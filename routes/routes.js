@@ -7,6 +7,10 @@ require('dotenv').config()
 
 
 //routes
+router.route('/')
+.get(async (req,res) => {
+    return "Hello World"
+})
 router.route('/course')
 .post(async (req,res) => {
     const course = new course_model({
