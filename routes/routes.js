@@ -9,7 +9,7 @@ require('dotenv').config()
 //routes
 router.route('/')
 .get(async (req,res) => {
-    return "Hello World"
+    return "Hello Ashraf"
 })
 router.route('/course')
 .post(async (req,res) => {
