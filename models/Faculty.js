@@ -1,25 +1,13 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Department = require('./Department').schema;
 
-const taSchema = new mongoose.Schema({
+const facultySchema = new mongoose.Schema({
     name :{ 
         type: String,
-       
     },
     department :{ 
-        type: Array(),
-        
-        
+        type: [Department]    
     },
 })
 
- class Faculty {
-    constructor(name,department) {
-
-      this.name =name;
-      this.department = department;
-      
-     
-  }
-
-}
-module.exports = mongoose.model('Faculty',taSchema)
+module.exports = mongoose.model('Faculty',facultySchema)

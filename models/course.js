@@ -1,42 +1,23 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Department = require('./Department').schema;
 
-const taSchema = new mongoose.Schema({
-
+const courseSchema = new mongoose.Schema({
     id: {
         type: String,
-        
-
     },
     name :{ 
-        type: String,
-        required: true,
-        minlength: 4
+        type: String
     },
     department: {
-        type: Department,
-       
+        type: Department
     },
     course_covarage: {
-        type: Number,
+        type: Number
     
     },
-
     acedemic_coordinator_id: {
-        type: String,
-       
+        type: String
     }
-    
 })
-export class course {
-    constructor(id, name,department,course_covarage,acedemic_coordinator_id) {
 
-      this.id = id;
-      this.name = name;
-      this.department=department;
-      this.course_covarage=course_covarage;
-      this.acedemic_coordinator_id=acedemic_coordinator_id;
-    }
-  }
-
-
-module.exports = mongoose.model('course',taSchema)
+module.exports = mongoose.model('course', courseSchema)

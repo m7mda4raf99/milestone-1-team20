@@ -1,37 +1,21 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const  room_location  = require('./Room_Location').schema;
+const  course  = require('./Course').schema;
 
-const taSchema = new mongoose.Schema({
+
+const slotSchema = new mongoose.Schema({
     course :{ 
-        type: String,
-    
+        type: course,
     },
     day :{ 
         type: String,
-      
-        
     },
     room_location:{ 
-        type: String,
-       
-        
+        type: room_location, 
     },
    which_slot :{ 
         type: Number,
-      
-       
-        
-    },
+    }
 })
-
-export class slot {
-    constructor(course,day,room_location,which_slot) {
-
-      this.course =course;
-      this.day = day;
-      this.room_location=room_location;
-      this.which_slot= which_slot;
-     
-  }
-
-}
-module.exports = mongoose.model('slot',taSchema)
+ 
+module.exports = mongoose.model('slot', slotSchema)

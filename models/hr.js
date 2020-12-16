@@ -1,41 +1,32 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const office_location = require('./Office_Location').schema;
 
-const taSchema = new mongoose.Schema({
+const hrSchema = new mongoose.Schema({
     id: {
         type: String,
-        
-
+        required: true
     },
     name :{ 
         type: String,
-       
+        required: true
     },
     email: {
-        type: String,
-       
+        type: String,    
+        required: true
+
     },
     password: {
-        type: String,
-       
-        
+        type: String,  
     },
     salary: {
         type: Number,
+        required: true
      
     },
+    office_location: {
+        type: office_location,
+        required: true
+    }
 })
 
-export class Faculty {
-    constructor(id,name,email,password,salary) {
-      this.id=id;
-      this.name =name;
-      this.email = email;
-      this.password=password;
-      this.salary=salary;
-
-      
-     
-  }
-
-}
-module.exports = mongoose.model('hr',taSchema)
+module.exports = mongoose.model('hr',hrSchema)

@@ -1,21 +1,29 @@
 {
-  "name": "assignment-1",
+  "name": "ms1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.html",
+  "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m7mda4raf99/ACLProject.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m7mda4raf99/ACLProject/issues"
+  },
+  "homepage": "https://github.com/m7mda4raf99/ACLProject#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.3",
-    "mongoose": "^5.10.15",
+    "mongoose": "^5.11.8",
     "nodemon": "^2.0.6"
   }
 }
