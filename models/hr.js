@@ -4,7 +4,9 @@ const office_location = require('./Office_Location').schema;
 const hrSchema = new mongoose.Schema({
     id: {
         type: String,
-        required: true
+        required: true,
+        unique: true  
+        
     },
     name :{ 
         type: String,
@@ -12,7 +14,9 @@ const hrSchema = new mongoose.Schema({
     },
     email: {
         type: String,    
-        required: true
+        required: true,
+        unique: true  
+        
 
     },
     password: {
