@@ -44,6 +44,9 @@ const academicMemberSchema = new mongoose.Schema({
     HOD: {
         type: Boolean
     },
+    Coordinator: {
+        type: Boolean
+    },
     role: {
         type: String
     },
@@ -58,6 +61,9 @@ const academicMemberSchema = new mongoose.Schema({
     },
     schedule: {
         type: [slot]
+    },
+    Phone_Number: {
+        type:Number
     }
 })
  
