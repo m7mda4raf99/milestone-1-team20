@@ -30,6 +30,16 @@ const hrSchema = new mongoose.Schema({
     office_location: {
         type: office_location,
         required: true
+    },
+    role:{
+        type:String
+    },
+    gender: {
+        type: String
+    },
+    
+    Phone_Number: {
+        type:Number
     }
 })
 
