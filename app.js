@@ -1,8 +1,7 @@
 const express = require('express')
 
 //require routes files
-const routes = require('./routes/routes')
-const staff_routes = require('./routes/staff_route')
+const staff_routes = require('./routes/Staff_route')
 const blockList = staff_routes.blockList
 const jwt = require('jsonwebtoken')
 const app = express()

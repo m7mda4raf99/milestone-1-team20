@@ -45,15 +45,17 @@ const tokenVerification = (req,res,next) => {
 router.route('/staff/userLogin')
 .post(async(req,res)=>{
     const AcademicUser = await Academic_Member.find({email: req.body.email})
-    if(AcademicUser){
+    
+    if(AcademicUser.length !== 0){
         login = new Date()
         const token= jwt.sign({id: AcademicUser[0].id, role: AcademicUser[0].role, HOD: AcademicUser[0].HOD, 
             Coordinator: AcademicUser[0].Coordinator},process.env.TOKEN_SECRET)  
                      res.header('token', token).send('You logged in successfully!')
     }
+
     else{
         const HRUser = await HR.find({email: req.body.email})
-        if(HRUser){
+        if(HRUser.length !== 0){
             const token= jwt.sign({id: HRUser[0].id , role: HRUser[0].role},process.env.TOKEN_SECRET)
                          res.header('token', token).send('You logged in successfully!')
         }else{
@@ -86,21 +88,22 @@ router.route('/staff/logout')
 router.route('/staff/viewProfile')
 .get(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
-    if(AcademicUser){
+    if(AcademicUser.length !== 0){
         res.send("ID: " + AcademicUser[0].id + "\n"+
                  "Name: " + AcademicUser[0].name + "\n" +
                  "Password: " + AcademicUser[0].password + "\n"+
+                 "Phone Number: " + AcademicUser[0].Phone_Number + "\n" +
                  "Salary: " + AcademicUser[0].salary + "\n"+
-                 "Department: " + AcademicUser[0].department + "\n"+
-                 "Faculty: " + AcademicUser[0].faculty + "\n"+
-                 "Office Location: " + AcademicUser[0].office_location + "\n"+
+                 "Department: " + AcademicUser[0].department_name + "\n"+
+                 "Faculty: " + AcademicUser[0].faculty_name + "\n"+
+                 "Room Location: " + AcademicUser[0].room_location_id + "\n"+
                  "Head of Department: " + AcademicUser[0].HOD + "\n"+
                  "Coordinator: " + AcademicUser[0].Coordinator + "\n"+
                  "Role: " + AcademicUser[0].role + "\n"+
                  "Gender: " + AcademicUser[0].gender + "\n"+
                  "Courses Taught: " + AcademicUser[0].courses_taught + "\n"+
                  "Assign Slots: " + AcademicUser[0].assign_slots + "\n"+
-                 "Schedule: " + AcademicUser[0].schedule + "\n"
+                 "Schedule: " + AcademicUser[0].schedule + "\n" 
                    )
  
     }else{
@@ -108,8 +111,9 @@ router.route('/staff/viewProfile')
         res.send("ID: " + HRUser[0].id + "\n"+
         "Name: " + HRUser[0].name + "\n" +
         "Password: " + HRUser[0].password + "\n"+
+        "Phone Number: " + AcademicUser[0].Phone_Number + "\n" +
         "Salary: " + HRUser[0].salary + "\n"+
-        "Office Location: " + HRUser[0].office_location + "\n"+
+        "Room Location: " + HRUser[0].room_location_id + "\n"+
         "Role: " + HRUser[0].role + "\n"+
         "Gender: " + HRUser[0].gender + "\n"
           )
@@ -124,7 +128,7 @@ router.route('/staff/viewProfile')
 router.route('/staff/updateProfile')
 .put(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
-    if(AcademicUser){
+    if(AcademicUser.length !== 0){
         Academic_Member.findOneAndRemove({
            id:AcademicUser[0].id
         })
@@ -169,7 +173,6 @@ router.route('/staff/updateProfile')
 
     }else{
         const HRUser = await HR.find({id: req.data.id})
-        if(HRUser){
             HR.findOneAndRemove({
                id:HRUser[0].id
             })
@@ -212,7 +215,7 @@ router.route('/staff/updateProfile')
             }
             
 
-        }
+        
     }
 
 })
@@ -221,7 +224,7 @@ router.route('/staff/updateProfile')
 router.route('/staff/resetPassword')
 .put(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
-    if(AcademicUser){
+    if(AcademicUser.length !== 0){
         Academic_Member.findOneAndRemove({
             id:AcademicUser[0].id
          })
@@ -258,28 +261,204 @@ router.route('/staff/resetPassword')
 })
 
 router.route('/lalo')
-.get(async(req,res)=>{
+.post(async(req,res)=>{
    
-
-
-console.log((date2.getTime()-date.getTime())/1000)
+if(req.body.id){
+    
+}
 
 })
 
 
 
 
+/////////////////////////////////////INSERTING IN DATABASE////////////////////////////
+router.route('/staff/addAcademicMember')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10871",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        password: "123",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
 
-router.route('/staff/add')
+})
+router.route('/staff/addAttendance')
 .post(async (req,res)=>{    
     const newM = new Academic_Member({
         id: "43-10872",
         name: "Mohamed Ashraf",
         email: "mohzashraf1@gmail.com",
-        password: "ACLProject",
         salary: 5000000,
-        department: {"name": "MET", "faculty_name": "Engineering"},
-        office_location:{id : "C5.201"}
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addCourse')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addDepartment')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addFaculty')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addHR')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addLeaves')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addRoom')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+router.route('/staff/addSlot')
+.post(async (req,res)=>{    
+    const newM = new Academic_Member({
+        id: "43-10872",
+        name: "Mohamed Ashraf",
+        email: "mohzashraf1@gmail.com",
+        salary: 5000000,
+        department_name: "MET",
+        room_location_id:"C5.201"
     })
     await newM.save().then(doc => {
         res.send(doc);
