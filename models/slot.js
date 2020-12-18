@@ -1,22 +1,21 @@
 const mongoose = require('mongoose');
-const  room_location  = require('./Room_Location').schema;
-const  course  = require('./Course').schema;
+//const  room_location  = require('./Room_Location').schema;
+//const  course  = require('./Course').schema;
 
 
 const slotSchema = new mongoose.Schema({
-    course :{ 
-        type: course,
+    course_id :{ 
+        type: String,
     },
     day :{ 
         type: String,
     },
-    room_location:{ 
-        type: room_location, 
+    room_location_id:{ 
+        type: String, 
     },
    which_slot :{ 
-        type: Number,
+        type: Number
     }
-   
 })
  
 module.exports = mongoose.model('slot', slotSchema)

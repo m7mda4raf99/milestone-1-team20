@@ -5,10 +5,10 @@ const attendanceSchema=new mongoose.Schema({
         type: String
     },
     signIn:{
-        type: [String]
+        type: []    //[String]
     },
     signOut:{
-        type: [String]
+        type: []    //[String]
     },
     spentHoursPerMonth:{
         type: Number

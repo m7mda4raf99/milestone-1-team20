@@ -4,12 +4,13 @@ const Department = require('./Department').schema;
 const courseSchema = new mongoose.Schema({
     id: {
         type: String,
+        unique:true
     },
     name :{ 
         type: String
     },
-    department: {
-        type: Department
+    department_name: {
+        type: String
     },
     course_covarage: {
         type: Number

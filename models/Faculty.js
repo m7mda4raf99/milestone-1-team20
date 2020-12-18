@@ -4,10 +4,8 @@ const Department = require('./Department').schema;
 const facultySchema = new mongoose.Schema({
     name :{ 
         type: String,
-    },
-    department :{ 
-        type: [Department]    
-    },
+        unique: true
+    }
 })
 
 module.exports = mongoose.model('Faculty',facultySchema)
