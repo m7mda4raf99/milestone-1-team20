@@ -5,18 +5,23 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
+
 const Academic_Member = require('../models/Academic_Member')
+const Room_Location = require('../models/room_Location')
 
 const HR = require('../models/HR');
-var blockList = []
+const Blocklist = require('../models/Blocklist')
 var login
 var logout
+var x = 0
 
-
-const tokenVerification = (req,res,next) => {
+const tokenVerification = async (req,res,next) => {
       const token = req.headers.token
+      console.log("ashraf: "+ token)
       if(token){
-          if((blockList.filter((token)=>token === req.headers.token)).length === 0){
+          //if((blockList.filter((token)=>token === req.headers.token)).length === 0){
+            const blockList = await Blocklist.find({name: req.headers.token})
+            if(blockList.length === 0){
               try{
                   const correctToken = jwt.verify(token, process.env.TOKEN_SECRET)
                       if(correctToken){
@@ -44,6 +49,8 @@ const tokenVerification = (req,res,next) => {
 ///////////////////////////////////////////////LOGIN////////////////////////////////////////////
 router.route('/staff/userLogin')
 .post(async(req,res)=>{
+    x=1
+    console.log("staff roue: "+ x)
     const AcademicUser = await Academic_Member.find({email: req.body.email})
     
     if(AcademicUser.length !== 0){
@@ -69,7 +76,9 @@ router.route('/staff/userLogin')
 router.route('/staff/logout')
 .post(async(req,res)=>{
     //console.log(blockList)
-    if((blockList.filter((token)=>token === req.headers.token)).length !== 0){
+    //if((blockList.filter((token)=>token === req.headers.token)).length !== 0){
+        const blocklist = await Blocklist.find({name: req.headers.token})
+        if(blocklist.length !==0){
         res.send('You are already logged out')
     }
     else{
@@ -79,7 +88,11 @@ router.route('/staff/logout')
         console.log("month: "+ logout.getMonth())
         console.log("year: "+logout.getFullYear())
 
-        blockList.push(req.headers.token)
+        //blockList.push(req.headers.token)
+        const newBlockcontent = new Blocklist({
+            name: req.headers.token
+        })
+        await newBlockcontent.save()
         res.send('You logged out successfully')
     }
 })
@@ -278,9 +291,10 @@ router.route('/staff/addAcademicMember')
     const newM = new Academic_Member({
         id: "43-10871",
         name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
+        email: "mohzashraf@gmail.com",
         password: "123",
         salary: 5000000,
+        faculty_name:"Eng",
         department_name: "MET",
         room_location_id:"C5.201"
     })
@@ -430,13 +444,11 @@ router.route('/staff/addLeaves')
 })
 router.route('/staff/addRoom')
 .post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10872",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        room_location_id:"C5.201"
+    const newM = new Room_Location({
+        id: "C5.201",
+        type_of_Room: "Office",
+        capacity_left: 3,
+        
     })
     await newM.save().then(doc => {
         res.send(doc);
@@ -450,6 +462,17 @@ router.route('/staff/addRoom')
         })
 
 })
+
+router.route('/staff/addBlocklist')
+.post(async (req,res)=>{
+    const newblock = new Blocklist({
+        name: "ashraf"
+    })
+
+    await newblock.save()
+    res.send(newblock)
+})
+
 router.route('/staff/addSlot')
 .post(async (req,res)=>{    
     const newM = new Academic_Member({
@@ -473,4 +496,7 @@ router.route('/staff/addSlot')
 
 })
 
+module.exports = function getX(){
+    return x
+}
 module.exports = router
