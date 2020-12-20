@@ -12,13 +12,27 @@ const courseSchema = new mongoose.Schema({
     department_name: {
         type: String
     },
-    course_covarage: {
+    course_coverage: {
         type: Number
     
     },
-    acedemic_coordinator_id: {
+    academic_coordinator_id: {
         type: String
+    },
+    slots: {
+        type: []       //[slot]
+    },
+    numberOfAssignedSlots:{
+        type: Number,
+        default: 0
+    },
+    numberOfUnassignedSlots:{
+        type: Number,
+        default: 0
     }
+
+    
+
 })
 
-module.exports = mongoose.model('course', courseSchema)
+module.exports = mongoose.model('course ashraf', courseSchema)
