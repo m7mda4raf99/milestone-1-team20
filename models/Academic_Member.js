@@ -110,4 +110,8 @@ const academicMemberSchema = new mongoose.Schema({
 
 
 
+<<<<<<< HEAD
 module.exports = mongoose.model('Academic Member ziad', academicMemberSchema)
+=======
+module.exports = mongoose.model('Academic Member ashaf 5arya m7dsh yegy gmb kosomha', academicMemberSchema)
+>>>>>>> a11f25cf9b3627282783a8f5ac47d51b45bdabbc
