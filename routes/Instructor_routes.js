@@ -126,8 +126,7 @@ router.route('/Instructor/assignAcademicToSlot')
     slot = room.filter(item => item.day === req.body.day && item.which_slot === req.body.which_slot &&
                                item.course_id !== req.body.course_id )
     var staff = await Academic_Member.find({id: req.body.staff_id})
-
-                             
+             
 
     //course entered in the body is not assigned to this instructor
     if((instructor[0].courses_taught.filter(item => item === req.body.course_id)).length === 0){
@@ -144,7 +143,7 @@ router.route('/Instructor/assignAcademicToSlot')
     }
     //assigning staff to this slot
      else{
-        const unAssignedSlot = await slot.find({room_location_id: req.body.room_location_id, 
+        var unAssignedSlot = await slot.find({room_location_id: req.body.room_location_id, 
             course_id: req.body.course_id, day: req.body.day, which_slot: req.body.which_slot})
         var course = await Course.find({id: req.body.course_id})
         //updating staff member
@@ -164,8 +163,12 @@ router.route('/Instructor/assignAcademicToSlot')
         course[0].course_coverage = course[0].numberOfAssignedSlots/ (course[0].numberOfAssignedSlots + 
             course[0].numberOfUnassignedSlots)
 
-        await staff.save()
-        await course.save
+        await staff[0].save()
+        await course[0].save()
+
+        //updating slot
+        unAssignedSlot[0].academic_member_id = req.body.staff_id
+        await unAssignedSlot[0].save()
 
         res.send("Staff member is assigned to this course slot successfully")
     }
@@ -179,7 +182,45 @@ router.route('/Instructor/updateAcademicSlot')
 
 router.route('/Instructor/deleteAcademicSlot')
 .delete(async (req,res) => {
-    
+    var AssignedSlot = await slot.find({room_location_id: req.body.room_location_id, 
+        course_id: req.body.course_id, day: req.body.day, which_slot: req.body.which_slot, 
+        academic_member_id: req.body.staff_id})
+
+    if(AssignedSlot.length === 0){
+        res.send("The academic member is already unassigned to this slot")
+    }else{
+        //updating slot
+        await slot.findOneAndDelete({room_location_id: req.body.room_location_id, 
+            course_id: req.body.course_id, day: req.body.day, which_slot: req.body.which_slot, 
+            academic_member_id: req.body.staff_id})
+        AssignedSlot[0].academic_member_id = undefined
+        await AssignedSlot[0].save()
+
+        //updating course
+        var Course = await Course.find({id: req.body.course_id})
+        await Course.findOneAndDelete({id: req.body.course_id})
+        course[0].numberOfUnassignedSlots += 1 
+        course[0].numberOfAssignedSlots -= 1
+        course[0].course_coverage = course[0].numberOfAssignedSlots/ (course[0].numberOfAssignedSlots + 
+            course[0].numberOfUnassignedSlots)
+
+        await course[0].save()
+        
+        //updating staff
+        var staff = await Academic_Member.find({id: req.body.staff_id})
+        await Academic_Member.findOneAndDelete({id: req.body.staff_id})
+            //remove from schedule
+        const index = staff[0].schedule.indexOf(slot => slot.course_id === req.body.course_id && slot.day === req.body.day &&
+            slot.room_location_id === req.body.room_location_id && slot.which_slot === req.body.which_slot && 
+            slot.academic_member_id === req.body.staff_id)
+        if(index > -1){
+            staff[0].schedule.splice(index, 1)
+        }    
+
+            //update course taught and assign slot
+
+
+    }      
 })
 
 ///remove
