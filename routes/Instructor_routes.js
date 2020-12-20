@@ -215,9 +215,11 @@ router.route('/Instructor/deleteAcademicSlot')
             slot.academic_member_id === req.body.staff_id)
         if(index > -1){
             staff[0].schedule.splice(index, 1)
+            staff[0].schedule.splice(index, 1)
         }    
 
             //update course taught and assign slot
+
 
 
     }      
