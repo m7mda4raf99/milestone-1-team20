@@ -11,7 +11,7 @@ const roomLocationSchema = new mongoose.Schema({
     },
     capacity_left :{ 
         type: Number
-    }  
+    }
 })
    
 module.exports = mongoose.model('room_location', roomLocationSchema)
