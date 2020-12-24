@@ -52,7 +52,12 @@
       Route: 
       Request type:
       Request body: /////////////////////////////////////// 
-      
+     
+   ### HR Functionalities
+    1.Functionality: Sign OUT a Staff Member. 
+      Route: /HR/addRoom
+      Request type: POST
+      Request body: /////////////////////////////////////// 
       
      
     
