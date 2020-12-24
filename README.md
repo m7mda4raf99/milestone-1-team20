@@ -48,7 +48,7 @@
       Request type:
       Request body: /////////////////////////////////////// 
       
-    10.Functionality: View Staff Member are having missing hours or extra hours. . 
+    10.Functionality: View Staff Member are having missing hours or extra hours. 
       Route: 
       Request type:
       Request body: /////////////////////////////////////// 
@@ -118,6 +118,49 @@
            Route:/HR/deleteCourse   
            Request type:DELETE
            Request body: /////////////////////////////////////// 
+           
+        13.Functionality:HR add Staff Member. 
+           Route:/HR/add_Academic_Member
+           Request type: POST
+           Request body: /////////////////////////////////////// 
+           
+        14.Functionality:Update existing staff members. 
+           Route: /HR/update_academic_members/:id
+           Request type: PUT
+           Parameters: id is the id of the academic member we are getting its info
+           Example of how to call the route: /////////////////////////////    
+               
+        15.Functionality: Delete existing staff members. 
+           Route: /HR/delete_Academic_Member/:id
+           Request type: DELETE
+           Parameters: id is the id of the academic member we are getting its info
+           Example of how to call the route: /////////////////////////////   
+           
+        16.Functionality:Manually add a missing sign in/sign out record of a staff member. 
+           Route:///////////
+           Request type: ///////////
+           Request body: ///////////////////////////////////////   
+           
+        17.Functionality: View any Staff Member attendance record.
+           Route:///////////////////
+           Request type: GET
+           Response: Array of Staff Member Attendence. Example of a single Staff Member Attendence: { ///////////////// }
+           
+        18.Functionality: View Staff Members with missing hours/days.
+           Route:///////////////////
+           Request type: GET
+           Response: Array of Staff Member missing hours/days. Example of a single Staff Member missing hours/days: { ///////////////// }
+           
+        19.Functionality: Update the salary of a staff member. 
+           Route: /////////////////////////////
+           Request type: PUT
+           Parameters:////////////////////////////////////////////////////////////////////
+           Example of how to call the route: /////////////////////////////      
+           
+           
+           
+           
+           
            
            
            
