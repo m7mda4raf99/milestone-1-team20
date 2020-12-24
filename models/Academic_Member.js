@@ -6,42 +6,6 @@ const bcrypt = require('bcrypt')
 const Slot = require('./slot').schema;
 const Attendance = require('./Attendance').schema;
 
-// var pass = ""
-
-
-// async function hashPassword () {
-
-//     const password ='123456'
-//     const saltRounds = 10;
-  
-//     const hashedPassword = await new Promise((resolve, reject) => {
-//       bcrypt.hash(password, saltRounds, function(err, hash) {
-//         if (err) reject(err)
-//         resolve(hash)
-//       });
-//     })
-  
-//     console.log( hashedPassword)
-//   }
-
-  
-
-
-
-// async function hashPass() {
-//     return await bcrypt.hash('123456', 10)
-//   }
-
-//   console.log(hashPass()[0]+ "cfvgbhnj")
-
-// const hashPass = async () => {
-//     const hash = await bcrypt.hash('123456', 10)
-//     pass = hash
-    
-// }
-
-//setTimeout(() => {  console.log("bhnjmk"+pass) }, 5000);
-
 
 const academicMemberSchema = new mongoose.Schema({
     id: {
@@ -79,10 +43,12 @@ const academicMemberSchema = new mongoose.Schema({
         required: true
     },
     HOD: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     Coordinator: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     role: {
         type: String

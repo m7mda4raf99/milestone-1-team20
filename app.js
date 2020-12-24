@@ -4,24 +4,27 @@ const express = require('express')
 const staff_routes = require('./routes/Staff_route')
 const instructor_routes = require('./routes/Instructor_routes')
 const hr_routes = require('./routes/HR_route')
+const Coordinator = require('./routes/Course_Coordinator_routes')
+const Academic_Member_routes = require('./routes/Academic_Member_routes')
+const HOD_routes = require('./routes/HOD_route')
 
-
-const blockList = staff_routes.blockList
 const jwt = require('jsonwebtoken')
 const app = express()
-const name = "ASHRAF"
 require('dotenv').config()
 app.use(express.json())
+
 
 //app.use routes
 app.use('',staff_routes)
 app.use('',instructor_routes)
 app.use('',hr_routes)
-
+app.use('',Coordinator)
+app.use('',Academic_Member_routes)
+app.use('',HOD_routes)
 
 
 
 module.exports.app = app 
-module.exports.name = name
+
 
 

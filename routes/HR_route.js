@@ -11,8 +11,8 @@ const course = require('../models/course')
 const Blocklist = require('../models/Blocklist')
 const Attendance = require('../models/Attendance')
 
-const { blockList, get } = require('./staff_route')
-const getX = require('./staff_route')
+//const { blockList, get } = require('./staff_route')
+//const getX = require('./staff_route')
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -86,9 +86,15 @@ router.route('/HR/updateRoom/:id')
     
     const oldRoom = await room_location.find({id: req.params.id})
 
+    var id = ""
     var capacity = 0
     var type = ""
 
+    if(req.body.id){
+        id = req.body.id
+    }else{
+        id = oldRoom[0].id
+    }  
     if(req.body.capacity_left){
         capacity = req.body.capacity_left
     }else{
@@ -652,12 +658,15 @@ router.route('/HR/add_Academic_Member')
     if(req.data.role !== "HR"){
         res.send("Access denied! You must be a HR member!")
     }else{
-    // console.log("999999")
+        //hashing default password = 123456
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash("123456",salt)
+
         const Academic_membermodel=  new Academic_Member({
             id:req.body.id,
             name : req.body.name, 
             email: req.body.email,
-            password: req.body.password,
+            password: hashedPassword,
             salary:req.body.salary,
             department_name:req.body.department_name,
             faculty_name:req.body.faculty_name,

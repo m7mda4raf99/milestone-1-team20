@@ -15,17 +15,30 @@ const attendanceSchema=new mongoose.Schema({
         default: 0
     },
     spentHoursPerMonth:{
-        type: Number
+        type: Number,
+        default: 0
     },
     missingDays:{
-        type: Number
+        type: Number,
+        default: 0
     },
     missingHours:{
-        type: Number
+        type: Number,
+        default: 0
     },
     missingMinutes:{
-        type: Number
+        type: Number,
+        default: 0
+    },
+    acceptedMissingHours:{
+        type: Number,
+        default: 0
+    },
+    acceptedMissingMinutes:{
+        type: Number,
+        default: 0
     }
+
 }
 )
 
