@@ -43,7 +43,7 @@
       Request type:
       Request body: /////////////////////////////////////// 
    
-   9.Functionality: View Staff Member missing days. . 
+    9.Functionality: View Staff Member missing days.
       Route: 
       Request type:
       Request body: /////////////////////////////////////// 
