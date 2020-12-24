@@ -13,7 +13,8 @@ const courseSchema = new mongoose.Schema({
         type: String
     },
     course_coverage: {
-        type: Number
+        type: Number,
+        default: 0
     
     },
     academic_coordinator_id: {

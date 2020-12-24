@@ -5,42 +5,27 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-
 const Academic_Member = require('../models/Academic_Member')
-<<<<<<< HEAD
-const Room_Location = require('../models/room_Location')
-
-const HR = require('../models/HR');
-const Blocklist = require('../models/Blocklist')
-var login
-var logout
-var x = 0
-
-const tokenVerification = async (req,res,next) => {
-      const token = req.headers.token
-      console.log("ashraf: "+ token)
-      if(token){
-          //if((blockList.filter((token)=>token === req.headers.token)).length === 0){
-            const blockList = await Blocklist.find({name: req.headers.token})
-            if(blockList.length === 0){
-=======
 const HR = require('../models/hr')
 const Course = require('../models/course')
 const Slot = require('../models/slot')
 const Blocklist = require('../models/Blocklist')
+const room_location = require('../models/room_Location')
+const Attendance =require('../models/Attendance')
+
 //var blockList = []
 var signIn
 var signOut
 var name = "ashraf"
+var dateOfToday = ""
+var days =["sunday","monday","tuesday","wednesday","thursday","friday"]
 
 const tokenVerification = async (req,res,next) => {
       const token = req.headers.token
-      console.log("ashraf: " + token)
       if(token){
          // if((blockList.filter((token)=>token === req.headers.token)).length === 0){
              const blockList = await Blocklist.find({name: req.headers.token})
              if(blockList.length === 0){
->>>>>>> a11f25cf9b3627282783a8f5ac47d51b45bdabbc
               try{
                   const correctToken = jwt.verify(token, process.env.TOKEN_SECRET)
                       if(correctToken){
@@ -64,27 +49,127 @@ const tokenVerification = async (req,res,next) => {
       }
 }
 
+// var flag = true
+// var oldHour = new Date().getHours()    
+
+// var intervalID = setInterval(function(){
+//         var date = new Date()
+    
+//         console.log("oldHour: " + oldHour)
+//         console.log("date: " + date.getHours())
+
+//         if(oldHour !== date.getHours()){
+//             oldHour = date.getHours()
+//             flag = true
+//         }
+//         if(date.getHours() === 19 && flag){
+//             console.log("hesham")
+//             flag = false
+//         }
+// }, 1000);
+
+var flag = true
+
+var intervalID = setInterval(function(){
+    var oldHour = new Date().getHours()    
+        var date = new Date()
+        if(oldHour !== date.getHours()){
+            oldHour = date.getHours()
+            flag = true
+        }
+        if(date.getHours() === 19 && flag){
+            everyDay()
+            flag = false
+        }
+
+}, 1000)
+
+async function everyDay(){
+    dateOfToday = new Date(Date.now())
+
+    const academicrocords = await Academic_Member.find()
+    for(var i=0;i<academicrocords.length;i++){
+        //member forgets to signOUT
+        if(academicrocords[i].Attendance.SignedIn===1){
+            academicrocords[i].Attendance.signOut.push(academicrocords[i].Attendance.signIn)
+            academicrocords[i].Attendance.SignedIn=0
+        }
+
+        //if today is the dayOff of the member 'i'
+        
+        if(academicrocords[i].Attendance.dayOff.toLowerCase() === days[dateOfToday.getDay()]){
+           
+            for(var j = 0;j<academicrocords[i].Attendance.signIn.length;j++){
+                
+                var hours = Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)
+                var minutes=academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60-(Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)*60)
+                var total_hours_minutes=hours+minutes/60
+               
+                if (dateOfToday.toISOString().slice(0,10)===
+                      academicrocords[i].Attendance.signIn[j].toISOString().slice(0,10)){
+                    academicrocords[i].Attendance.acceptedMissingHours -= hours
+                    academicrocords[i].Attendance.acceptedMissingMinutes -= minutes
+                    academicrocords[i].Attendance.spentHoursPerMonth[j] += total_hours_minutes 
+                }
+
+
+            }
+      }else{
+          if(hours===0&&minutes===0){
+            academicrocords[i].Attendance.missingDays[j]+=1
+          }
+          else if(total_hours_minutes<7.4){
+              if(minutes < 24){
+                academicrocords[i].Attendance.missingHours[j]= 8 - hours
+                academicrocords[i].Attendance.missingMinutes[j] = 24 - minutes
+              }else{
+                academicrocords[i].Attendance.missingHours[j]= 8 - hours - 1
+                academicrocords[i].Attendance.missingMinutes[j] = minutes - 24
+              }
+
+          }else if (7.4 <= total_hours_minutes && 8.4 >= total_hours_minutes){
+
+          }else{
+
+          }
+
+        }
+
+        
+    }
+}
+
 //routes
 ///////////////////////////////////////////////LOGIN////////////////////////////////////////////
 router.route('/staff/userLogin')
 .post(async(req,res)=>{
-    x=1
-    console.log("staff roue: "+ x)
     const AcademicUser = await Academic_Member.find({email: req.body.email})
     
     if(AcademicUser.length !== 0){
-        const token= jwt.sign({id: AcademicUser[0].id, role: AcademicUser[0].role, HOD: AcademicUser[0].HOD, 
-            Coordinator: AcademicUser[0].Coordinator},process.env.TOKEN_SECRET)  
-                     res.header('token', token).send('You logged in successfully!')
+        const correctPassword = await bcrypt.compare(req.body.password,AcademicUser[0].password)
+
+        if(correctPassword){
+            const token= jwt.sign({id: AcademicUser[0].id, role: AcademicUser[0].role, HOD: AcademicUser[0].HOD, 
+                Coordinator: AcademicUser[0].Coordinator},process.env.TOKEN_SECRET)  
+                        res.header('token', token).send('You logged in successfully!')
+        }else{
+            res.send("Incorrect password!")
+        }
     }
 
     else{
         const HRUser = await HR.find({email: req.body.email})
         if(HRUser.length !== 0){
-            const token= jwt.sign({id: HRUser[0].id , role: HRUser[0].role},process.env.TOKEN_SECRET)
-                         res.header('token', token).send('You logged in successfully!')
+            const correctPassword = await bcrypt.compare(req.body.password,HRUser[0].password)
+
+            if(correctPassword){
+                const token= jwt.sign({id: HRUser[0].id , role: HRUser[0].role},process.env.TOKEN_SECRET)
+                            res.header('token', token).send('You logged in successfully!')
+            }else{
+                res.send("Incorrect password!")
+            }
         }else{
-            res.status(401).send('Email or password is incorrect!')
+            res.status(401).send('Incorrect email!')
         }
     }
    
@@ -95,13 +180,8 @@ router.route('/staff/logout')
 .post(async(req,res)=>{
     //console.log(blockList)
     //if((blockList.filter((token)=>token === req.headers.token)).length !== 0){
-<<<<<<< HEAD
-        const blocklist = await Blocklist.find({name: req.headers.token})
-        if(blocklist.length !==0){
-=======
         const blockList = await Blocklist.find({name: req.headers.token})
     if(blockList.length !==0 ){
->>>>>>> a11f25cf9b3627282783a8f5ac47d51b45bdabbc
         res.send('You are already logged out')
     }
     else{
@@ -112,10 +192,7 @@ router.route('/staff/logout')
             name: req.headers.token
         })
         await newBlockcontent.save()
-<<<<<<< HEAD
-=======
         
->>>>>>> a11f25cf9b3627282783a8f5ac47d51b45bdabbc
         res.send('You logged out successfully')
     }
 })
@@ -219,7 +296,10 @@ router.route('/staff/updateProfile')
                 console.error(err)
                 })
         }if(req.body.password){
-            AcademicUser[0].password = req.body.password
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(req.body.password,salt)
+
+            AcademicUser[0].password = hashedPassword
             await AcademicUser[0].save().then(doc => {
                 res.send(doc);
             })
@@ -263,7 +343,10 @@ router.route('/staff/updateProfile')
                     console.error(err)
                     })
             }if(req.body.password){
-                HRUser[0].password = req.body.password
+                const salt = await bcrypt.genSalt(10)
+                const hashedPassword = await bcrypt.hash(req.body.password,salt)
+
+                HRUser[0].password = hashedPassword
                 await HRUser[0].save().then(doc => {
                     res.send(doc);
                 })
@@ -291,7 +374,10 @@ router.route('/staff/resetPassword')
             id:AcademicUser[0].id
          })
          if(req.body.password){
-            AcademicUser[0].password = req.body.password
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(req.body.password,salt)
+    
+            AcademicUser[0].password = hashedPassword
             await AcademicUser[0].save().then(doc => {
                 res.send("Password is updated successfully!");
             })
@@ -308,8 +394,10 @@ router.route('/staff/resetPassword')
                id:HRUser[0].id
             })
             if(req.body.password){
-
-                HRUser[0].password = req.body.password
+                const salt = await bcrypt.genSalt(10)
+                const hashedPassword = await bcrypt.hash(req.body.password,salt)
+        
+                HRUser[0].password = hashedPassword
                 await HRUser[0].save().then(doc => {
                     res.send("Password is updated successfully!");
                 })
@@ -330,7 +418,7 @@ router.route('/staff/signIn')
 
     await Academic_Member.findOneAndRemove({id: req.body.id})
 
-    signIn = new Date()
+    signIn = new Date(Date.now())
 
     console.log(user[0])
 
@@ -375,7 +463,7 @@ router.route('/staff/signOut')
 
     await Academic_Member.findOneAndRemove({id: req.body.id})
 
-    signOut = new Date()
+    signOut = new Date(Date.now())
 
 
     if(user[0].Attendance.SignedIn === 1){
@@ -419,25 +507,28 @@ router.route('/staff/signOut')
 router.route('/staff/addAcademicMember')
 .post(async (req,res)=>{    
     const slot = new Slot({
-        course_id: "CSEN701",
-        day: "Sunday",
-        which_slot: 5
+        
+            course_id:"CSEN701",
+            day: "Tuesday",
+            which_slot: 1,
+            room_location_id: "C7.301"
+           
+        
     })
-
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash("ashraf123",salt)
     const newM = new Academic_Member({
-        id: "43-10875",
+        id: "43-108711",
         name: "Mohamed Ashraf",
-<<<<<<< HEAD
-        email: "mohzashraf@gmail.com",
-=======
-        email: "mohzashraf5@gmail.com",
->>>>>>> a11f25cf9b3627282783a8f5ac47d51b45bdabbc
-        password: "123",
+        email: "m11@gmail.com",
+        password: hashedPassword,
         salary: 5000000,
-        faculty_name:"Eng",
         department_name: "MET",
+        faculty_name: "Engineering",   
         room_location_id:"C5.201",
+        role:"TA",
         courses_taught: ["CSEN701"],
+        assign_slots: [1],
         schedule: [slot]
     })
     await newM.save().then(doc => {
@@ -455,12 +546,14 @@ router.route('/staff/addAcademicMember')
 router.route('/staff/addAttendance')
 .post(async (req,res)=>{    
     const newM = new Academic_Member({
-        id: "43-10872",
+        id: "43-10871",
         name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
+        email: "m1@gmail.com",
         salary: 5000000,
         department_name: "MET",
-        room_location_id:"C5.201"
+        faculty_name: "Engineering",   
+        room_location_id:"C5.201",
+        role:"TA"
     })
     await newM.save().then(doc => {
         res.send(doc);
@@ -479,8 +572,7 @@ router.route('/staff/addCourse')
     const newM = new Course({
         id: "CSEN701",
         name: "Embedded",
-        department_name: "MET",
-        course_coverage: 70
+        department_name: "MET"
     })
     await newM.save().then(doc => {
         res.send(doc);
@@ -585,11 +677,9 @@ router.route('/staff/addLeaves')
 })
 router.route('/staff/addRoom')
 .post(async (req,res)=>{    
-    const newM = new Room_Location({
+    const newM = new room_location({
         id: "C5.201",
-        type_of_Room: "Office",
-        capacity_left: 3,
-        
+        type_of_Room: "Office"
     })
     await newM.save().then(doc => {
         res.send(doc);
@@ -603,26 +693,14 @@ router.route('/staff/addRoom')
         })
 
 })
-
-router.route('/staff/addBlocklist')
-.post(async (req,res)=>{
-    const newblock = new Blocklist({
-        name: "ashraf"
-    })
-
-    await newblock.save()
-    res.send(newblock)
-})
-
 router.route('/staff/addSlot')
 .post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10872",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        room_location_id:"C5.201"
+    const newM = new Slot({
+        course_id: "CSEN701",
+        day: "Tuesday",
+        room_location_id: "C7.301",
+        which_slot: 1,
+        academic_member_id: "43-10871"
     })
     await newM.save().then(doc => {
         res.send(doc);
@@ -637,8 +715,6 @@ router.route('/staff/addSlot')
 
 })
 
-module.exports = function getX(){
-    return x
-}
+
 module.exports = router
 
