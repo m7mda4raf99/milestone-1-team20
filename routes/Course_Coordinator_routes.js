@@ -13,7 +13,6 @@ require('dotenv').config()
 
 const tokenVerification = async (req,res,next) => {
     const token = req.headers.token
-    // console.log("ashraf: " + token)
     if(token){
        // if((blockList.filter((token)=>token === req.headers.token)).length === 0){
            const blockList = await Blocklist.find({name: req.headers.token})
@@ -41,9 +40,146 @@ const tokenVerification = async (req,res,next) => {
     }
 }
 
-//routes
+
+////////////////////////////////////////VIEW SLOT LINKING/////////////////////////////////////////
+
+router.route('/Course_Coordinator/viewslotlinking')
+.get(tokenVerification, async( req,res)=>{
+    if(!req.data.Coordinator){
+        res.send("Access denied! You must be a Head of Department!")
+}
+else{
+    var per=req.data.id
+    var result77=[]
+    var request77
+    if(per){
+        const course =await courses.find({acedemic_coordinator_id:per})
+    //    console.log(course)
+        const course_taken=await Academic_Member.find({Coordinator:false})//Coordinator:false
+      //  console.log(course_taken)
+        for(var i=0;i<course_taken.length;i++){
+            for(var j=0;j<course_taken[i].courses_taught.length;j++){
+                if(course[0].id===course_taken[i].courses_taught[j])
+                 request77=await requests.find({sender_id:course_taken[i].id})
+                 if(request77.length!==0){
+                     for(var w=0;w<request77.length;w++){
+                         if(request77[w].type_of_request==="slot_linking")
+                            result77.push(request77)
+                     }
+                 }
+            }
+        }
+
+     //   const slotlinking=await requests.find({academic_member_id:per})
+        if(result77.length===0)
+          return res.send("No such requests with slot linking")
+        var result=""
+      for(var i=0;i<result77.length;i++){
+     //   result+="id: "+slotlinking[i].id+"  target_day: "+slotlinking[i].target_day+" date_of_request: "+slotlinking[i].date_of_request+" type of request: "+slotlinking[i].type_of_request+" status of request: "+slotlinking[i].status_of_request  +" sender id: "+slotlinking[i].sender_id+"  destination id: "+slotlinking[i].destination_id
+          result+=result77[0]+"\n";
+      }
+      return res.send(result)
+    }
+    else{
+        res.send("Access Denied")
+    }
+}
+})
+
+//////////////////////////////////ACCEPT/REJECT SLOT LINKING///////////////////////////////////////
+
+router.route('/Course_Coordinator/viewslotlinkingaccept_reject')
+.put(tokenVerification, async( req,res)=>{
+    if(!req.data.Coordinator){
+        res.send("Access denied! You must be a Head of Department!")
+}
+else{
+    var per=req.data.id
+    var result7=""
+    if(per){
+        const req1=await requests.find({id:req.body.requestid})
+        req1[0].status_of_request=req.body.status_of_request
+        const reqnew=new requests({
+            id:req1[0].id,
+            target_day:req1[0].target_day,
+            date_of_request :req1[0].date_of_request,
+            type_of_request :req1[0].type_of_request,
+            status_of_request:req1[0].status_of_request,
+            sender_id:req1[0].sender_id,
+            destination_id: req1[0].destination_id,
+            document: req1[0].document
+        })
+        await requests.findOneAndRemove({id:req.body.requestid})
+        await reqnew.save().then(doc => {
+            //res.send(doc);
+            result7+=doc+"\n";
+           
+        })
+        .catch(err => {
+        console.error(err)
+        })
+        if(req.body.status_of_request==="Accept"){
+            
+            if (req1[0].sender_id===req.body.slot.academic_member_id){
+                 const academic=await Academic_Member.find({id:req1[0].sender_id})
+                 academic[0].schedule.push(req.body.slot)
+                 const aca=new Academic_Member({
+                    id:academic[0].id,
+                    name : academic[0].name, 
+                    email: academic[0].email,
+                    password: academic[0].password,
+                    salary:academic[0].salary,
+                    department_name:academic[0].department_name,
+                    faculty_name:academic[0].faculty_name,
+                    room_location_id:academic[0].room_location_id,
+                    HOD: academic[0].Hod,
+                    Coordinator:academic[0].Coordinator,
+                    role:academic[0].role,
+                    gender:academic[0].gender,
+                    courses_taught:academic[0].courses_taught,
+                    assign_slots:academic[0].assign_slots,
+                    schedule: academic[0].schedule,
+                    Phone_Number:academic[0].Phone_Number,
+                    Attendance:academic[0].Attendance,
+                    annual_balance: academic[0].annual_balance,
+                    accidental_balance: academic[0].accidental_balance,
+                    isNewMember: academic[0].isNewMember,
+                    Notification: academic[0].Notification,
+                    putInVisa: academic[0].putInVisa
+
+                 
+                 })
+                 await Academic_Member.findOneAndRemove({id:req1[0].sender_id})
+                 await aca.save().then(doc => {
+                    //res.send(doc);
+                    result7+=doc;
+                   
+                })
+                .catch(err => {
+                console.error(err)
+                })
+                res.send(result7)
+            }
+            else{
+                res.send("the id of the request is not the same as in the slot please check again the data")
+            }
+        }
+    }
+    else{
+        res.send("Access Denied")
+    }
+}
+})
+
+
+////////////////////////////////////////ADD COURSE SLOT/////////////////////////////////////////
+
 router.route('/Coordinator/addCourseSlot')
 .post(tokenVerification, async (req,res)=>{
+    if(!req.data.Coordinator){
+        res.send("Access denied! You must be a Head of Department!")
+}
+else{
     const coordinator = await Academic_Member.find({id: req.data.id})
     const room = await room_Location.find({id: req.body.room_location_id})
     const slot = await slots.find({day: req.body.day, room_location_id: req.body.room_location_id,
@@ -72,6 +208,8 @@ router.route('/Coordinator/addCourseSlot')
 
             // console.log(course[0])
             await newSlot.save()
+            .then(response => {})
+            .catch(err => {console.log(err)})
 
             const newCourse = new Course({
                 id: course[0].id,
@@ -87,17 +225,24 @@ router.route('/Coordinator/addCourseSlot')
 
 
             await newCourse.save()
+            .then(response => {res.send("Course slot is added successfully!")})
+            .catch(err => {console.log(err)})
 
-            res.send("Course slot is added successfully!")
 
         }
     }
+}
 
 })
 
+////////////////////////////////////////DELETE COURSE SLOT/////////////////////////////////////////
+
 router.route('/Coordinator/deleteCourseSlot')
 .delete(tokenVerification, async (req,res)=>{
-    //remove from slot
+    if(!req.data.Coordinator){
+        res.send("Access denied! You must be a Head of Department!")
+}
+else{
 
     const slot = await slots.find({course_id: req.body.course_id, day: req.body.day, 
         room_location_id: req.body.room_location_id, which_slot: req.body.which_slot})
@@ -142,6 +287,9 @@ router.route('/Coordinator/deleteCourseSlot')
                     })
 
                     await newCourse.save()
+                    .then(response => {})
+                    .catch(err => {console.log(err)})
+
                 }
             }
         }
@@ -174,6 +322,9 @@ router.route('/Coordinator/deleteCourseSlot')
                             schedule: staff[i].schedule, Phone_Number: staff[i].Phone_Number, Attendance: staff[i].Attendance
                         })
                         await newStaff.save()
+                        .then(response => {})
+                        .catch(err => {console.log(err)})
+
 
 
                 }
@@ -184,10 +335,17 @@ router.route('/Coordinator/deleteCourseSlot')
 
     }
 
+}
 })
+
+////////////////////////////////////////UPDATE COURSE SLOT/////////////////////////////////////////
 
 router.route('/Coordinator/updateCourseSlot')
 .put(tokenVerification, async (req,res)=>{
+    if(!req.data.Coordinator){
+        res.send("Access denied! You must be a Head of Department!")
+}
+else{
     const coordinator = await Academic_Member.find({id: req.data.id})
     const room = await room_Location.find({id: req.body.newroom_location_id})
     const slot = await slots.find({day: req.body.newday, room_location_id: req.body.newroom_location_id,
@@ -225,6 +383,10 @@ router.route('/Coordinator/updateCourseSlot')
             })
 
             await newSlot.save()
+            .then(response => {})
+            .catch(err => {console.log(err)})
+
+
 
             
             //update the slot from course slots
@@ -253,6 +415,10 @@ router.route('/Coordinator/updateCourseSlot')
                             })
 
                             await course.save()
+                            .then(response => {})
+                            .catch(err => {console.log(err)})
+      
+      
                         }
                     }
                 }
@@ -285,6 +451,10 @@ router.route('/Coordinator/updateCourseSlot')
                                 schedule: staff[i].schedule, Phone_Number: staff[i].Phone_Number, Attendance: staff[i].Attendance
                             })
                             await newStaff.save()
+                            .then(response => {})
+                            .catch(err => {console.log(err)})
+      
+      
 
 
                         }
@@ -299,6 +469,7 @@ router.route('/Coordinator/updateCourseSlot')
         else{
             res.send("Something is undefined. Please make sure of your data entry")
         }
+}
 })
 
 

@@ -14,4 +14,4 @@ const roomLocationSchema = new mongoose.Schema({
     }
 })
    
-module.exports = mongoose.model('room_location ashraf', roomLocationSchema)
+module.exports = mongoose.model('Room Location', roomLocationSchema)

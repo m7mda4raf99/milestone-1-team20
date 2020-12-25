@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-//const  room_location  = require('./Room_Location').schema;
-//const  course  = require('./Course').schema;
 
 const slotSchema = new mongoose.Schema({
     course_id :{ 
@@ -21,4 +19,4 @@ const slotSchema = new mongoose.Schema({
 
 })
  
-module.exports = mongoose.model('slot ashraf', slotSchema)
+module.exports = mongoose.model('Slot', slotSchema)

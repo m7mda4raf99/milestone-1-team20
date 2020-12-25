@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Department = require('./Department').schema;
 
 const courseSchema = new mongoose.Schema({
     id: {
@@ -15,7 +14,6 @@ const courseSchema = new mongoose.Schema({
     course_coverage: {
         type: Number,
         default: 0
-    
     },
     academic_coordinator_id: {
         type: String
@@ -32,8 +30,6 @@ const courseSchema = new mongoose.Schema({
         default: 0
     }
 
-    
-
 })
 
-module.exports = mongoose.model('course ashraf', courseSchema)
+module.exports = mongoose.model('Course', courseSchema)

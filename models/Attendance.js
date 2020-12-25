@@ -10,10 +10,6 @@ const attendanceSchema=new mongoose.Schema({
     signOut:{
         type: []    //[String]
     },
-    SignedIn:{
-        type: Number,
-        default: 0
-    },
     spentHoursPerMonth:{
         type: Number,
         default: 0
@@ -30,11 +26,11 @@ const attendanceSchema=new mongoose.Schema({
         type: Number,
         default: 0
     },
-    acceptedMissingHours:{
+    extraHours:{
         type: Number,
         default: 0
     },
-    acceptedMissingMinutes:{
+    extraMinutes:{
         type: Number,
         default: 0
     }

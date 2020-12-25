@@ -9,26 +9,17 @@ const Faculty = require('../models/Faculty')
 const Department = require('../models/Department')
 const course = require('../models/course')
 const Blocklist = require('../models/Blocklist')
-const Attendance = require('../models/Attendance')
-
-//const { blockList, get } = require('./staff_route')
-//const getX = require('./staff_route')
+const Info = require('../models/Info')
 
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const { findOneAndRemove } = require('../models/room_Location')
-var id = 1
-var newmember=false;
-
-
 require('dotenv').config()
-
+const jwt = require('jsonwebtoken')
+const { response } = require('express')
+var id = 0
 
 const tokenVerification = async (req,res,next) => {
     const token = req.headers.token
-    console.log("ashraf: " + token)
     if(token){
-       // if((blockList.filter((token)=>token === req.headers.token)).length === 0){
            const blockList = await Blocklist.find({name: req.headers.token})
            if(blockList.length === 0){
             try{
@@ -54,11 +45,11 @@ const tokenVerification = async (req,res,next) => {
     }
 }
 
-/////////////////////////(ADD)room_location///////////////////////////////////
+/////////////////////////////////ADD ROOM LOCATION///////////////////////////////////
 
 router.route('/HR/addRoom')
 .post(tokenVerification,async(req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     const room_locationmodel=  new room_location({
@@ -67,20 +58,17 @@ router.route('/HR/addRoom')
         capacity_left:req.body.capacity_left
     }
     )
-    await room_locationmodel.save().then(doc => {
-        res.send(doc);
-    })
-    .catch(err => {
-    console.error(err)
-    })
+        await room_locationmodel.save()
+        .then(doc => {res.send(doc);})
+        .catch(err => {console.error(err)})
     }
 })
 
-/////////////////////////(Update)room_location///////////////////////////////////
+///////////////////////////////UPDATE ROOM LOCATION///////////////////////////////////
 
 router.route('/HR/updateRoom/:id')
 .put(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     
@@ -115,107 +103,99 @@ router.route('/HR/updateRoom/:id')
     })
 
     await newRoom.save()
+    .then(doc => {res.send(doc)})
+    .catch(err => {console.error(err)})
     }
     })
 
-/////////////////////////(delete)room_location///////////////////////////////////
+///////////////////////////////DELETE ROOM LOCATION///////////////////////////////////
+
 router.route('/HR/deleteRoom/:id')
 .delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
         await  room_location
-        .findOneAndRemove({
-        id: req.params.id
-        })
+        .findOneAndRemove({id: req.params.id})
         .then(response => {
-        console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-}
-})
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////(add)Faculty///////////////////////////////////
-router.route('/HR/addFaculty')
-.post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-        const facultymodel=  new Faculty({
-            name:req.body.name
-        })
-
-        await facultymodel.save().then(doc => {
-            res.send(doc);
-        })
-        .catch(err => {
-        console.error(err)
-        })
+            console.log(response)
+            res.send(response) })
+        .catch(err => { console.error(err)})
     }
 })
 
-/////////////////////////(delete)Faculty///////////////////////////////////
-router.route('/HR/deleteFaculty')
- .delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+
+///////////////////////////////ADD FACULTY///////////////////////////////////
+
+router.route('/HR/addFaculty')
+.post(tokenVerification, async( req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-        await  Faculty
-        .findOneAndRemove({
-        name: req.body.name
-        })
-        .then(response => {
-        console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
+        const facultymodel=  new Faculty({name:req.body.name})
+
+        await facultymodel.save().then(doc => {res.send(doc)})
+        .catch(err => {console.error(err)})
+    }
+})
+
+///////////////////////////////DELETE FACULTY///////////////////////////////////
+
+router.route('/HR/deleteFaculty')
+ .delete(tokenVerification, async( req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
+        res.send("Access denied! You must be a HR member!")
+    }else{
+        await  Faculty.findOneAndRemove({name: req.body.name})
+        .then(response => {console.log(response)
+        res.send(response)})
+        .catch(err => {console.error(err)})
+       
         var oldUsers = await Academic_Member.find({faculty_name : req.body.name})
 
         for(var i=0;i<oldUsers.length;i++){
             await Academic_Member.findOneAndRemove({faculty_name : req.body.name})
-            .then(response => {}).catch(err => {console.error("Can't find users with same department")})
+            .then(response => {})
+            .catch(err => {console.error("Can't find users with same department")})
             
-            const newUser = new Academic_Member({
-            
-                id: oldUsers[i].id,
-                name: oldUsers[i].name,
+            const newUser=  new Academic_Member({
+                id:oldUsers[i].id,
+                name : oldUsers[i].name, 
                 email: oldUsers[i].email,
                 password: oldUsers[i].password,
-                salary: oldUsers[i].salary,
-                department_name : oldUsers[i].department_name,
+                salary:oldUsers[i].salary,
+                department_name:oldUsers[i].department_name,
                 faculty_name: null,
-                room_location_id:oldUsers[i].room_location_id
-                //HOD: oldUsers[i].HOD,
-            // role: oldUsers[i].role,
-            // gender: oldUsers[i].gender,
-            // courses_taught: oldUsers[i].courses_taught,
-            // assign_slots: oldUsers[i].assign_slots,
-                //schedule: oldUsers[i].schedule,
-                
-
-
+                room_location_id:oldUsers[i].room_location_id,
+                HOD: oldUsers[i].HOD,
+                Coordinator:oldUsers[i].Coordinator,
+                role:oldUsers[i].role,
+                gender:oldUsers[i].gender,
+                courses_taught:oldUsers[i].courses_taught,
+                assign_slots:oldUsers[i].assign_slots,
+                schedule: oldUsers[i].schedule,
+                Phone_Number:oldUsers[i].Phone_Number,
+                annual_balance: oldUsers[i].annual_balance,
+                accidental_balance: oldUsers[i].accidental_balance,
+                Attendance:oldUsers[i].Attendance,
+                isNewMember: oldUsers[i].isNewMember,
+                Notification: oldUsers[i].Notification,
+                putInVisa: oldUsers[i].putInVisa
             })
             console.log(newUser)
-            await newUser.save().then(doc => {
-                res.send("jnkm");
-            }).then(response => {}).catch(err => {console.error("Can't save updated user to database")})
+            await newUser.save().then(doc => {})
+            .then(response => {res.send("faculty deleted successfully!")})
+            .catch(err => {console.error("Can't save updated user to database")})
             
         }
     }
 })
 
-/////////////////////////(update)Faculty///////////////////////////////////
+///////////////////////////////UPDATE FACULTY///////////////////////////////////
+
 router.route('/HR/updateFaculty/:name')
 .put(tokenVerification, async(req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     //  const oldRoom = await Faculty.find({name: req.params.name})
@@ -225,6 +205,8 @@ router.route('/HR/updateFaculty/:name')
             name: req.body.name
         })
         await newfaculty.save()
+        .then(response => {})
+        .catch(err => {console.log(err)})
 
 
     var olddepart = await Department.find({faculty_name : req.params.name})
@@ -253,24 +235,29 @@ router.route('/HR/updateFaculty/:name')
             await Academic_Member.findOneAndRemove({faculty_name : req.params.name})
             .then(response => {}).catch(err => {console.error("Can't find users with same department")})
             
-            const newUser = new Academic_Member({
-            
-                id: oldUsers[i].id,
-                name: oldUsers[i].name,
+            const newUser=  new Academic_Member({
+                id:oldUsers[i].id,
+                name : oldUsers[i].name, 
                 email: oldUsers[i].email,
                 password: oldUsers[i].password,
-                salary: oldUsers[i].salary,
-                department_name : oldUsers[i].department_name,
-                faculty_name: req.body.name,
-                room_location_id:oldUsers[i].room_location_id
-                //HOD: oldUsers[i].HOD,
-            // role: oldUsers[i].role,
-            // gender: oldUsers[i].gender,
-            // courses_taught: oldUsers[i].courses_taught,
-            // assign_slots: oldUsers[i].assign_slots,
-                //schedule: oldUsers[i].schedule,
-                
-
+                salary:oldUsers[i].salary,
+                department_name:oldUsers[i].department_name,
+                faculty_name:req.body.name,
+                room_location_id:oldUsers[i].room_location_id,
+                HOD: oldUsers[i].HOD,
+                Coordinator:oldUsers[i].Coordinator,
+                role:oldUsers[i].role,
+                gender:oldUsers[i].gender,
+                courses_taught:oldUsers[i].courses_taught,
+                assign_slots:oldUsers[i].assign_slots,
+                schedule: oldUsers[i].schedule,
+                Phone_Number:oldUsers[i].Phone_Number,
+                annual_balance: oldUsers[i].annual_balance,
+                accidental_balance: oldUsers[i].accidental_balance,
+                Attendance:oldUsers[i].Attendance,
+                isNewMember: oldUsers[i].isNewMember,
+                Notification: oldUsers[i].Notification,
+                putInVisa: oldUsers[i].putInVisa
 
             })
             console.log(newUser)
@@ -283,12 +270,11 @@ router.route('/HR/updateFaculty/:name')
         }
 })
 
+///////////////////////////////ADD DEPARTMENT///////////////////////////////////
 
-
-/////////////////////////(add)department///////////////////////////////////
 router.route('/HR/addDepartment')
 .post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
         const departmentmodel=  new Department({
@@ -296,17 +282,10 @@ router.route('/HR/addDepartment')
             faculty_name:req.body.faculty_name
         })
 
-    const exists= await  Faculty
-        .exists({
-        name: req.body.faculty_name,
-        })
+    const exists= await Faculty.exists({name: req.body.faculty_name})
         if(exists){
-            await departmentmodel.save().then(doc => {
-                res.send(doc);
-            })
-            .catch(err => {
-            console.error(err)
-            })
+            await departmentmodel.save().then(doc => {res.send(doc)})
+            .catch(err => {console.error(err)})
         }
         else{
             res.status(404).send('faculty doesnot exist')
@@ -315,54 +294,58 @@ router.route('/HR/addDepartment')
     }
 })
 
-/////////////////////////(update)department///////////////////////////////////
+///////////////////////////////UPDATE DEPARTMENT///////////////////////////////////
 
 router.route('/HR/updateDepartment/:name')
-.put(async( req,res)=>{
-    if(req.data.role !== "HR"){
+.put(tokenVerification, async( req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
         const olddep= await Department.find({name:req.params.name})
             await Department.findOneAndRemove({
-                name: req.params.name
-
-            }).then(response => {}).catch(err => {console.error("Can't find this department and remove it")})
+                name: req.params.name})
+            .then(response => {})
+            .catch(err => {console.error("Can't find this department and remove it")})
 
             const departmentmodel=  new Department({
                 name:req.body.name,
                 faculty_name:olddep[0].faculty_name
-            
             })
-            await departmentmodel.save().then(doc => {
-                res.send(doc);
-            }).then(response => {}).catch(err => {console.error("Can't save new department to database")})
+            await departmentmodel.save()
+            .then(doc => {res.send(doc)})
+            .then(response => {})
+            .catch(err => {console.error("Can't save new department to database")})
             
-
             var oldUsers = await Academic_Member.find({department_name : req.params.name})
-            //console.log("oldUsers" + oldUsers.length)
-
 
             for(var i=0;i<oldUsers.length;i++){
                 await Academic_Member.findOneAndRemove({department_name : req.params.name})
-                .then(response => {}).catch(err => {console.error("Can't find users with same department")})
-                //console.log("ashrafff "+oldUsers[i])
-                const newUser = new Academic_Member({
-                    id: oldUsers[i].id,
-                    name: oldUsers[i].name,
+                .then(response => {})
+                .catch(err => {console.error("Can't find users with same department")})
+                
+                const newUser=  new Academic_Member({
+                    id:oldUsers[i].id,
+                    name : oldUsers[i].name, 
                     email: oldUsers[i].email,
                     password: oldUsers[i].password,
-                    salary: oldUsers[i].salary,
-                    department_name : req.body.name,
-                    faculty_name: oldUsers[i].faculty_name,
-                    room_location_id:oldUsers[i].room_location_id
-                // HOD: oldUsers[i].HOD,
-                // role: oldUsers[i].role,
-                // gender: oldUsers[i].gender,
-                // courses_taught: oldUsers[i].courses_taught,
-                // assign_slots: oldUsers[i].assign_slots,
-                // schedule: oldUsers[i].schedule,
-
-
+                    salary:oldUsers[i].salary,
+                    department_name:req.body.name,
+                    faculty_name:oldUsers[i].faculty_name,
+                    room_location_id:oldUsers[i].room_location_id,
+                    HOD: oldUsers[i].HOD,
+                    Coordinator:oldUsers[i].Coordinator,
+                    role:oldUsers[i].role,
+                    gender:oldUsers[i].gender,
+                    courses_taught:oldUsers[i].courses_taught,
+                    assign_slots:oldUsers[i].assign_slots,
+                    schedule: oldUsers[i].schedule,
+                    Phone_Number:oldUsers[i].Phone_Number,
+                    annual_balance: oldUsers[i].annual_balance,
+                    accidental_balance: oldUsers[i].accidental_balance,
+                    Attendance:oldUsers[i].Attendance,
+                    isNewMember: oldUsers[i].isNewMember,
+                    Notification: oldUsers[i].Notification,
+                    putInVisa: oldUsers[i].putInVisa
 
                 })
                 await newUser.save().then(doc => {
@@ -383,8 +366,11 @@ router.route('/HR/updateDepartment/:name')
                     id: oldcourse[i].id,
                     name: oldcourse[i].name,
                     department_name : req.body.name,
-                // course_covarage: oldcourse[i].course_covarage,
-                    acedemic_coordinator_id:oldcourse[i].acedemic_coordinator_id
+                    course_coverage: oldcourse[i].course_coverage,
+                    academic_coordinator_id:oldcourse[i].academic_coordinator_id,
+                    slots: oldcourse[i].academic_coordinator_id,
+                    numberOfAssignedSlots: oldcourse[i].numberOfAssignedSlots,
+                    numberOfUnassignedSlots: oldcourse[i].numberOfUnassignedSlots
             
 
                 })
@@ -398,32 +384,22 @@ router.route('/HR/updateDepartment/:name')
 
 
             }
-    })
+})
 
+///////////////////////////////DELETE DEPARTMENT///////////////////////////////////
 
-/////////////////////////(delete)department///////////////////////////////////
 router.route('/HR/deleteDepartment/:name')
-.delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+.delete(tokenVerification, async(req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-        const exists= await  Department
-        .exists({
-        name: req.params.name,
-        })
+        const exists= await Department.exists({name: req.params.name})
 
         if(exists){
-
-            await Department.findOneAndRemove({
-                name: req.params.name
-            })
-            .then(response => {
-                console.log(response)
-                res.send(response)
-                })
-                .catch(err => {
-                console.error(err)
-                })
+            await Department.findOneAndRemove({name: req.params.name})
+            .then(response => {console.log(response)
+                res.send(response)})
+            .catch(err => {console.error(err)})
         
         }
         else{
@@ -435,35 +411,39 @@ router.route('/HR/deleteDepartment/:name')
             await Academic_Member.findOneAndRemove({department_name : req.params.name})
             .then(response => {}).catch(err => {console.error("Can't find users with same department")})
             
-            const newUser = new Academic_Member({
             
-                id: oldUsers[i].id,
-                name: oldUsers[i].name,
-                email: oldUsers[i].email,
-                password: oldUsers[i].password,
-                salary: oldUsers[i].salary,
-                department_name : null,
-                faculty_name: oldUsers[i].faculty_name,
-                room_location_id:oldUsers[i].room_location_id
-                //HOD: oldUsers[i].HOD,
-            // role: oldUsers[i].role,
-            // gender: oldUsers[i].gender,
-            // courses_taught: oldUsers[i].courses_taught,
-            // assign_slots: oldUsers[i].assign_slots,
-                //schedule: oldUsers[i].schedule,
-                
+                const newUser=  new Academic_Member({
+                    id:oldUsers[i].id,
+                    name : oldUsers[i].name, 
+                    email: oldUsers[i].email,
+                    password: oldUsers[i].password,
+                    salary:oldUsers[i].salary,
+                    department_name:null,
+                    faculty_name:oldUsers[i].faculty_name,
+                    room_location_id:oldUsers[i].room_location_id,
+                    HOD: oldUsers[i].HOD,
+                    Coordinator:oldUsers[i].Coordinator,
+                    role:oldUsers[i].role,
+                    gender:oldUsers[i].gender,
+                    courses_taught:oldUsers[i].courses_taught,
+                    assign_slots:oldUsers[i].assign_slots,
+                    schedule: oldUsers[i].schedule,
+                    Phone_Number:oldUsers[i].Phone_Number,
+                    annual_balance: oldUsers[i].annual_balance,
+                    accidental_balance: oldUsers[i].accidental_balance,
+                    Attendance:oldUsers[i].Attendance,
+                    isNewMember: oldUsers[i].isNewMember,
+                    Notification: oldUsers[i].Notification,
+                    putInVisa: oldUsers[i].putInVisa
 
-
-            })
+                })
             console.log(newUser)
-            await newUser.save().then(doc => {
-                res.send("jnkm");
-            }).then(response => {}).catch(err => {console.error("Can't save updated user to database")})
+            await newUser.save().then(doc => {})
+            .then(response => {})
+            .catch(err => {console.error("Can't save updated user to database")})
             
         }
 
-
-        console.log("oldcourse")
         var oldcourse = await course.find({department_name : req.params.name})
         console.log(oldcourse)
         for(var i=0;i<oldcourse.length;i++){
@@ -471,58 +451,49 @@ router.route('/HR/deleteDepartment/:name')
             .then(response => {}).catch(err => {console.error("Can't find users with same department")})
             
             const newcourse = new course({
-            
                 id: oldcourse[i].id,
                 name: oldcourse[i].name,
                 department_name : null,
-                course_covarage: oldcourse[i].course_covarage,
-                acedemic_coordinator_id:oldcourse[i].acedemic_coordinator_id
-        
-
+                course_coverage: oldcourse[i].course_coverage,
+                academic_coordinator_id:oldcourse[i].academic_coordinator_id,
+                slots: oldcourse[i].academic_coordinator_id,
+                numberOfAssignedSlots: oldcourse[i].numberOfAssignedSlots,
+                numberOfUnassignedSlots: oldcourse[i].numberOfUnassignedSlots
             })
-            console.log(newcourse)
-            await newcourse.save().then(doc => {
-                res.send("jnkm");
-            }).then(response => {}).catch(err => {console.error("Can't save updated user to database")})
-            
+            await newcourse.save()
+            .then(doc => {res.send("department deleted successfully!")})
+            .then(response => {})
+            .catch(err => {console.error("Can't save updated user to database")})   
         }
     
     }
 })
 
-  
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////(add)course///////////////////////////////////
+///////////////////////////////ADD COURSE///////////////////////////////////
+
 router.route('/HR/addCourse')
-.post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+.post(tokenVerification, async(req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
   const coursemodel=  new course({
       id:req.body.id,
       name:req.body.name,
       department_name:req.body.department_name,
-      course_covarage:req.body.course_covarage,
-      acedemic_coordinator_id:req.body.acedemic_coordinator_id,
+      course_coverage:req.body.course_coverage,
+      academic_coordinator_id:req.body.academic_coordinator_id,
+      slots: req.body.academic_coordinator_id,
+
       
   })    
 
- const exists= await  Department
-  .exists({
-  name: req.body.department_name,
-  })
+ const exists= await  Department.exists({name: req.body.department_name})
   if(exists){
-      await coursemodel.save().then(doc => {
-          res.send(doc);
-      })
-      .then(response => {
-        console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
+      await coursemodel.save().then(doc => {res.send(doc)})
+      .then(response => {console.log(response) 
+        res.send(response)})
+        .catch(err => {console.error(err)})
   }
   else{
       res.status(404).send('department doesnot exist')
@@ -530,10 +501,11 @@ router.route('/HR/addCourse')
 }
   })
 
-/////////////////////////(update)course///////////////////////////////////
+///////////////////////////////UPDATE COURSE///////////////////////////////////
+
 router.route('/HR/updateCourse')
-.put(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+.put(tokenVerification, async(req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
         const oldcourse = await course.find({id: req.body.id})
@@ -562,36 +534,42 @@ router.route('/HR/updateCourse')
 
         const newcourse = new course({
             id: req.body.id,
-            course_covarage: course_covarage,
-            acedemic_coordinator_id: acedemic_coordinator_id,
+            course_coverage: course_coverage,
+            academic_coordinator_id: academic_coordinator_id,
             name:name,
-            department_name:oldcourse[0].department_name
+            department_name:oldcourse[0].department_name,
+            slots: oldcourse[0].academic_coordinator_id,
+                numberOfAssignedSlots: oldcourse[0].numberOfAssignedSlots,
+                numberOfUnassignedSlots: oldcourse[0].numberOfUnassignedSlots
         })
 
         await newcourse.save()
+        .then(response => {res.send("course updated successfully!")})
+        .catch(err => {console.log(err)})
         }
 })
 
 
-/////////////////////////(delete)course///////////////////////////////////
+///////////////////////////////DELETE COURSE///////////////////////////////////
 
 router.route('/HR/deleteCourse')
 .delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
         const oldcourse = await course.find({id: req.body.id})
 
-        await course.findOneAndRemove({
-            id: req.body.id
-        })
+        await course.findOneAndRemove({id: req.body.id})
 
         const coursemodel=  new course({
             id:req.body.id,
             name:oldcourse[0].name,
             department_name:null,
-            course_covarage:oldcourse[0].course_covarage,
-            acedemic_coordinator_id:oldcourse[0].acedemic_coordinator_id
+            course_coverage:oldcourse[0].course_coverage,
+            academic_coordinator_id:oldcourse[0].academic_coordinator_id,
+            slots: oldcourse[0].academic_coordinator_id,
+                numberOfAssignedSlots: oldcourse[0].numberOfAssignedSlots,
+                numberOfUnassignedSlots: oldcourse[0].numberOfUnassignedSlots
             
         })   
 
@@ -611,225 +589,318 @@ router.route('/HR/deleteCourse')
 })
 
 
-/////////////////////////(add)HR Member///////////////////////////////////
+///////////////////////////////ADD ACADEMIC MEMBER///////////////////////////////////
 
-router.route('/HR/addHrMember')
+router.route('/HR/addAcademicMember')
 .post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-        const hrmodel=  new hr({
-            id:req.body.id,
-            name:req.body.name,
-            email:req.body.email,
-            salary:req.body.salary,
-            room_location:req.body.roomlocation,
-        })
-
-        if(room_location.capacity_left==0){
-            res.send("the office location you are trying to assign  is full")
-        }
-        else{
-
-            id++;
-            await hrmodel.save().then(doc => {
-                res.send(doc);
-                
-            })
-            .catch(err => {
-            console.error(err)
-            })
-            newmember=true;
-            }
-        }
-})
-.get(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-        res.send("hr-"+id);
+        var result7=""
+    const schema=Joi.object({
+    
+    email:Joi.string().email().required() ,
+    id:Joi.string().required(),
+    name :Joi.string().alphanum().min(3).max(30).required(),
+    password: Joi.string().required(),
+    salary:Joi.number(),
+    department_name:Joi.string(),
+    faculty_name:Joi.string(),
+    room_location_id:Joi.string(),
+    HOD: Joi.boolean().required(),
+    Coordinator:Joi.boolean().required(),
+    role:Joi.string().required(),
+    gender:Joi.string().required(),
+    courses_taught:Joi.string(),
+    assign_slots:Joi.string(),
+    schedule:Joi.string(),
+    Phone_Number:Joi.string(),
+    annual_balance:Joi.number(),
+    accidental_balance:Joi.number(),
+    isNewMember:Joi.boolean()
+    })
+    try{
+    const validation = await schema.validateAsync(req.body)
     }
+    catch(err){
+        return res.send(
+           // message:validation.error.details[0].message
+           err.details[0].message
+        )
+    }
+    // if(validation.error){
+       
+    // }
+
+
+
+   
+
+  const Academic_membermodel=  new Academic_Member({
+    id:req.body.id,
+    name : req.body.name, 
+    email: req.body.email,
+    password: req.body.password,
+    salary:req.body.salary,
+    department_name:req.body.department_name,
+    faculty_name:req.body.faculty_name,
+    room_location_id:req.body.room_location_id,
+    HOD: req.body.Hod,
+    Coordinator:req.body.Coordinator,
+    role:req.body.role,
+    gender:req.body.gender,
+    courses_taught:req.body.courses_taught,
+    assign_slots:req.body.assign_slots,
+    schedule: req.body.schedule,
+    Phone_Number:req.body.Phone_Number,
+     Attendance:{
+        dayOff:"Saturday",
+         signIn:undefined,
+         signOut:undefined,
+         spentHoursPerMonth:undefined,
+        missingDays:undefined,
+         missingHours:undefined,
+         missingMinutes:undefined
+     },
+     annual_balance:req.body.annual_balance,
+     accidental_balance:req.body.accidental_balance,
+     isNewMember:req.body.isNewMember,
+     Notification:req.body.Notification
+   
+
+  })
+
+  const RoomLoc=await room_location.find({
+      id:req.body.room_location_id})
+ if(!req.body.id){
+     res.send("the id is required");
+ }
+ else{
+const  check_id=await Academic_Member.find({
+id:req.body.id})
+const  check_email=await Academic_Member.find({
+    email:req.body.email})
+    
+    if(!req.body.department_name)
+    res.send("you must enter the department")
+    if(!req.body.faculty_name)
+    res.send("you must enter the faculty")
+    if(!req.body.role || (req.body.role!=="TA" && req.body.role!=="Instructor"))
+    res.send("the role must be either TA or Inst or either the role is not entered")
+
+    if(RoomLoc.length === 0){
+        res.send("the room location you are trying to assign doesnot exist")
+    }
+   else if(RoomLoc[0].capacity_left === 0){
+       res.send("the office location you are trying to assign  is full")
+   }
+   else if(RoomLoc[0].type_of_Room !== "office"){
+       console.log(RoomLoc[0].type_of_Room)
+    res.send("this room is not of type office ")
+   }
+   else if(check_id.length !== 0){
+    res.send("this id is used before")
+   }
+   else if(check_email.length !== 0){
+    res.send("this email is used before")
+   }
+   else{
+    RoomLoc[0].capacity_left--,
+    id++
+
+   
+
+   await Academic_membermodel.save().then(doc => {
+       result7+=doc+"\n";
+      
+   })
+   .catch(err => {
+     RoomLoc[0].capacity_left++;
+     id--;
+   console.error(err)
+  
+   })
+
+   await room_location.findOneAndRemove({
+    id:req.body.room_location_id
+})
+const newRoom = new room_location({
+    id: req.body.room_location_id,
+    capacity_left: RoomLoc[0].capacity_left,
+    type_of_Room: RoomLoc[0].type_of_Room
 })
 
-/////////////////////////////////ACADEMIC MEMBER/////////////////////////////
-//add academic member
-router.route('/HR/add_Academic_Member')
-.post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-        //hashing default password = 123456
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash("123456",salt)
 
-        const Academic_membermodel=  new Academic_Member({
-            id:req.body.id,
-            name : req.body.name, 
-            email: req.body.email,
-            password: hashedPassword,
-            salary:req.body.salary,
-            department_name:req.body.department_name,
-            faculty_name:req.body.faculty_name,
-            room_location_id:req.body.room_location_id,
-            HOD: req.body.Hod,
-            Coordinator:req.body.Coordinator,
-            role:req.body.role,
-            gender:req.body.gender,
-            courses_taught:req.body.courses_taught,
-            assign_slots:req.body.assign_slots,
-            schedule: req.body.schedule,
-            Phone_Number:req.body.Phone_Number,
-            Attendance:{
-                dayOff:"Saturday",
-                signIn:undefined,
-                signOut:undefined,
-                spentHoursPerMonth:undefined,
-                missingDays:undefined,
-                missingHours:undefined,
-                missingMinutes:undefined
-            }
-        
+  await newRoom.save().then(doc => {
+    result7+=doc+"\n";
+   
+})
+.catch(err => {
+console.error(err)
 
-        })
+})
+const inforecord=await Info.find()
+if(inforecord.length===0){
+    const newinfo=new Info({})
+    await newinfo.save().then(doc => {
+        result7+=doc;
+       
+    })
+    .catch(err => {
+    console.error(err)
+})
+}
+else{
+    const inforecord77=await Info.find()
+    inforecord77[0].id_academic++
+    const newinfo=new Info({
+        id_hr:inforecord77[0].id_hr,
+        id_academic:inforecord77[0].id_academic,
+        id_request:inforecord77[0].id_request
+    })
+    Info.findOneAndRemove({id_hr:inforecord77[0].id_hr})
 
-        const RoomLoc=await room_location.find({
-            id:req.body.room_location_id})
-        if(!req.body.id){
-            res.send("the id is required");
-        }
-        else{
-        const  check_id=await Academic_Member.find({
-        id:req.body.id})
-        const  check_email=await Academic_Member.find({
-            email:req.body.email})
+    await newinfo.save().then(doc => {
+        result7+=doc;
+       
+    })
+    .catch(err => {
+    console.error(err)
+})
 
 
-            if(RoomLoc.length === 0){
-                res.send("the room location you are trying to assign doesnot exist")
-            }
-        else if(RoomLoc[0].capacity_left === 0){
-            res.send("the office location you are trying to assign  is full")
-        }
-        else if(RoomLoc[0].type_of_Room !== "office"){
-            console.log(RoomLoc[0].type_of_Room)
-            res.send("this room is not of type office ")
-        }
-        else if(check_id.length !== 0){
-            res.send("this id is used before")
-        }
-        else if(check_email.length !== 0){
-            res.send("this email is used before")
-        }
-        else{
-            RoomLoc[0].capacity_left--,
-            id++
+}
+id++
 
-        
 
-        await Academic_membermodel.save().then(doc => {
-            res.send(doc);
-            
-        })
-        .catch(err => {
-            RoomLoc[0].capacity_left++;
-            id--;
-        console.error(err)
-        
-        })
+res.send(result7)
 
-        await room_location.findOneAndRemove({
-            id:req.body.room_location_id
-        })
-        const newRoom = new room_location({
-            id: req.body.room_location_id,
-            capacity_left: RoomLoc[0].capacity_left,
-            type_of_Room: RoomLoc[0].type_of_Room
-        })
-
-        await newRoom.save().then(doc => {
-            res.send(doc);
-        
-        })
-        .catch(err => {
-        console.error(err)
-        })
-        }
-        }
+  }
+}
     }
   })
 
   /// automatic id
 .get(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-         res.send("ac-"+id);
+        const info=await Info.find()
+        res.send("ac-"+ info[0].id_academic);
     }
 })
 
-//delete academic member
-router.route('/HR/delete_Academic_Member/:id')
+///////////////////////////////DELETE ACADEMIC MEMBER///////////////////////////////////
+
+router.route('/HR/deleteAcademicMember/:id')
 .delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
+        var result7=""
+        const schema=Joi.object({id:Joi.string().required()})
+        
+        try{
+        const validation = await schema.validateAsync(req.params)
+        }
+        catch(err){
+            return res.send(
+               // message:validation.error.details[0].message
+               err.details[0].message
+            )
+        }
+
     const  academic=await Academic_Member.find({
-        id:req.params.id})            
+        id:req.params.id})  
+        if(academic.length===0){
+            return res.send("this id doesn't exist")
+        }          
 
         const RoomLoc=await room_location.find({
             id:academic[0].room_location_id})
-
+    
         RoomLoc[0].capacity_left++
 
     await Academic_Member.findOneAndRemove({
         id: req.params.id
     })
 
-   
-        .then(response => {
-            
-            console.log(response)
-            res.send(response)
-            })
-            .catch(err => {
-                RoomLoc[0].capacity_left--
-            console.error(err)
-            })
+        .then(response => {console.log(response)
+            result7+=response+"\n"})
+        .catch(err => { RoomLoc[0].capacity_left--
+            console.error(err) })
 
-                await room_location.findOneAndRemove({
+           await room_location.findOneAndRemove({
                     id:academic[0].room_location_id
                 })
                 
 
                 const newRoom = new room_location({
-                    id: RoomLoc[0].room_location_id,
+                    id: academic[0].room_location_id,
                     capacity_left: RoomLoc[0].capacity_left,
                     type_of_Room: RoomLoc[0].type_of_Room
                 })
                 
                 await newRoom.save().then(doc => {
-                    res.send(doc);
+                   // res.send(doc);
+                   result7+=doc
                    
                 })
                 .catch(err => {
                 console.error(err)
                 })
+                res.send(result7);
 
     }
 }
   )
 
-router.route('/HR/update_academic_members/:id')
-.put(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+///////////////////////////////UPDATE ACADEMIC MEMBER///////////////////////////////////
+
+router.route('/HR/updateAcademicMember/:id')
+.put(tokenVerification, async(req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
+        var result7=""
+    const schema=Joi.object({
+    
+        id:Joi.string().required(),
+   
+        })
+        try{
+        const validation = await schema.validateAsync(req.params)
+        }
+        catch(err){
+            return res.send(
+               // message:validation.error.details[0].message
+               err.details[0].message
+            )
+        }
     const record= await Academic_Member.find({id: req.params.id});
+    if(record===0){
+        return res.send("this id doesn't exist")
+    }    
     
     await Academic_Member.findOneAndRemove({id: req.params.id})
 
     var id, name, email, password, salary, department_name, faculty_name, room_location_id, HOD, Coordinator,
-    role, gender, courses_taught, assign_slots, schedule, Phone_Number, Attendance
+    role, gender, courses_taught, assign_slots, schedule, Phone_Number, Attendance, Notification, putInVisa
+
+    const schema1=Joi.object({
+    
+        id:Joi.string().required(),
+   
+        })
+        try{
+        const validation1 = await schema1.validateAsync(req.body)
+        }
+        catch(err){
+            return res.send(
+               // message:validation.error.details[0].message
+               err.details[0].message
+            )
+        }
 
     if(req.body.id){
         id = req.body.id
@@ -908,8 +979,8 @@ router.route('/HR/update_academic_members/:id')
         
         
         await newRoom1.save().then(doc => {
-            res.send(doc);
-           
+           // res.send(doc);
+            result7+=doc+"\n"
         })
         .catch(err => {
         console.error(err)
@@ -973,6 +1044,31 @@ router.route('/HR/update_academic_members/:id')
     }else{
         Attendance = record[0].Attendance
     }
+    if(req.body.annual_balance){
+        annual_balance = req.body.annual_balance
+    }else{
+        annual_balance= record[0].annual_balance
+    }
+    if(req.body.accidental_balance){
+        accidental_balance = req.body.accidental_balance
+    }else{
+        accidental_balance = record[0].accidental_balance
+    }
+    if(req.body.isNewMember){
+        isNewMember = req.body.isNewMember
+    }else{
+        isNewMember = record[0].isNewMember
+    }
+    if(req.body.Notification){
+        Notification = req.body.Notification
+    }else{
+        Notification = record[0].Notification
+    }
+    if(req.body.putInVisa){
+        putInVisa = req.body.putInVisa
+    }else{
+        putInVisa = record[0].putInVisa
+    }
 
     const Academicmodel=  new Academic_Member({
                 id:id,
@@ -991,19 +1087,159 @@ router.route('/HR/update_academic_members/:id')
                 assign_slots: assign_slots,
                 schedule: schedule,
                 Phone_Number: Phone_Number,
-                Attendance: Attendance
+                Attendance: Attendance,
+                annual_balance:annual_balance,
+                accidental_balance:accidental_balance,
+                isNewMember:isNewMember,
+                Notification:Notification,
+                putInVisa: putInVisa
+
     })
 
-    await Academicmodel.save()
-    res.send(Academicmodel)
-}
+    await Academicmodel.save().then(doc => {
+       // res.send(doc);
+       result7+=doc+"\n"
+    })
+    .catch(err => {
+    console.error(err)
+    })
+  //  res.send(Academicmodel)
+  res.send(result7);
+    }
+})
+
+///////////////////////////////////ADD HR MEMBER/////////////////////////////////////////
+
+router.route('/HR/addHRMember')
+.post(tokenVerification, async( req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
+        res.send("Access denied! You must be a HR member!")
+    }else{
+        const HR_model=  new hr({
+            id:req.body.id,
+            name : req.body.name, 
+            email: req.body.email,
+            password: req.body.password,
+            salary:req.body.salary,
+            room_location_id:req.body.room_location_id,
+            role:req.body.role,
+            gender:req.body.gender,
+            Phone_Number:req.body.Phone_Number,
+            isNewMember:req.body.isNewMember,
+    
+           
+           
+        
+          })
+        
+          const RoomLoc=await room_location.find({
+              id:req.body.room_location_id})
+        
+        const  check_id=await hr.find({
+        id:req.body.id})
+        const  check_email=await hr.find({
+            email:req.body.email})
+        
+        
+            if(RoomLoc.length === 0){
+                res.send("the room location you are trying to assign doesnot exist")
+            }
+           else if(RoomLoc[0].capacity_left === 0){
+               res.send("the office location you are trying to assign  is full")
+           }
+           else if(RoomLoc[0].type_of_Room !== "office"){
+               console.log(RoomLoc[0].type_of_Room)
+            res.send("this room is not of type office ")
+           }
+           else if(check_id.length !== 0){
+            res.send("this id is used before")
+           }
+           else if(check_email.length !== 0){
+            res.send("this email is used before")
+           }
+           else{
+            RoomLoc[0].capacity_left--,
+            id++
+        
+           
+        
+           await HR_model.save().then(doc => {
+               res.send(doc);
+              
+           })
+           .catch(err => {
+             RoomLoc[0].capacity_left++;
+             id--;
+           console.error(err)
+          
+           })
+        
+           await room_location.findOneAndRemove({
+            id:req.body.room_location_id
+        })
+        const newRoom = new room_location({
+            id: req.body.room_location_id,
+            capacity_left: RoomLoc[0].capacity_left,
+            type_of_Room: RoomLoc[0].type_of_Room
+        })
+        
+        await newRoom.save().then(doc => {
+            res.send(doc);
+           
+        })
+        .catch(err => {
+        console.error(err)
+        })
+          }
+          
+          const inforecord=await Info.find()
+    if(inforecord.length===0){
+        const newinfo=new Info({})
+        await newinfo.save().then(doc => {
+            result7+=doc;
+           
+        })
+        .catch(err => {
+        console.error(err)
+    })
+    }
+    else{
+        const inforecord77=await Info.find()
+        inforecord77[0].id_hr++
+        const newinfo=new Info({
+            id_hr:inforecord77[0].id_hr,
+            id_academic:inforecord77[0].id_academic,
+            id_request:inforecord77[0].id_request
+        })
+        Info.findOneAndRemove({id_hr:inforecord77[0].id_academic})
+    
+        await newinfo.save().then(doc => {
+            result7+=doc;
+           
+        })
+        .catch(err => {
+        console.error(err)
+    })
+    
+    
+    }
+    
+    }
+})
+.get(tokenVerification, async( req,res)=>{
+    if(req.data.role.toLowerCase() !== "hr"){
+        res.send("Access denied! You must be a HR member!")
+    }else{
+         res.send("hr-"+id);
+    }
 })
 
 
-//delete hr member
-router.route('/HR/delete_hr_Member/:id')
+////////////////////////////////////DELETE HR MEMBER/////////////////////////////////////////
+
+router.route('/HR/deleteHRMember/:id')
 .delete(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     const  HR=await HR.find({
@@ -1048,109 +1284,18 @@ router.route('/HR/delete_hr_Member/:id')
 }
   )
 
-/// add hr member
-router.route('/HR/add_Hr_Member')
-.post(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-    const HR_model=  new hr({
-        id:req.body.id,
-        name : req.body.name, 
-        email: req.body.email,
-        password: req.body.password,
-        salary:req.body.salary,
-        room_location_id:req.body.room_location_id,
-        role: "HR",
-        gender:req.body.gender,
-        Phone_Number:req.body.Phone_Number,
-       
-       
-    
-      })
-    
-      const RoomLoc=await room_location.find({
-          id:req.body.room_location_id})
-    
-    const  check_id=await hr.find({
-    id:req.body.id})
-    const  check_email=await hr.find({
-        email:req.body.email})
-    
-    
-        if(RoomLoc.length === 0){
-            res.send("the room location you are trying to assign doesnot exist")
-        }
-       else if(RoomLoc[0].capacity_left === 0){
-           res.send("the office location you are trying to assign  is full")
-       }
-       else if(RoomLoc[0].type_of_Room !== "office"){
-           console.log(RoomLoc[0].type_of_Room)
-        res.send("this room is not of type office ")
-       }
-       else if(check_id.length !== 0){
-        res.send("this id is used before")
-       }
-       else if(check_email.length !== 0){
-        res.send("this email is used before")
-       }
-       else{
-        RoomLoc[0].capacity_left--,
-        id++
-    
-       
-    
-       await HR_model.save().then(doc => {
-           res.send(doc);
-          
-       })
-       .catch(err => {
-         RoomLoc[0].capacity_left++;
-         id--;
-       console.error(err)
-      
-       })
-    
-       await room_location.findOneAndRemove({
-        id:req.body.room_location_id
-    })
-    const newRoom = new room_location({
-        id: req.body.room_location_id,
-        capacity_left: RoomLoc[0].capacity_left,
-        type_of_Room: RoomLoc[0].type_of_Room
-    })
-    
-    await newRoom.save().then(doc => {
-        res.send(doc);
-       
-    })
-    .catch(err => {
-    console.error(err)
-    })
-      }  
-    }
-})
-.get(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-         res.send("hr-"+id);
-    }
-})
 
+//////////////////////////////////////UPDATE HR MEMBER/////////////////////////////////////////
 
-////update HR
 router.route('/HR/update_hr_member/:id')
 .put(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
-        res.send("Access denied! You must be a HR member!")
-    }else{
-    const record= await HR.find({id: req.params.id});
+    if(req.data.role.toLowerCase() === "hr"){
+        const record= await HR.find({id: req.params.id});
         
         await HR.findOneAndRemove({id: req.params.id})
     
         var id, name, email, password, salary,room_location_id,
-        role, gender, Phone_Number
+        role, gender, Phone_Number,isNewMember
     
         if(req.body.id){
             id = req.body.id
@@ -1246,7 +1391,12 @@ router.route('/HR/update_hr_member/:id')
         }else{
             Phone_Number = record[0].Phone_Number
         }
-    
+        
+        if(req.body.isNewMember){
+            isNewMember = req.body.isNewMember
+        }else{
+            isNewMember = record[0].isNewMember
+        }
       
     
         const hr_rmodel=  new HR({
@@ -1259,16 +1409,28 @@ router.route('/HR/update_hr_member/:id')
                     role: role,
                     gender: gender,
                     Phone_Number: Phone_Number,
+                    isNewMember:isNewMember
         })
     
         await hr_model.save()
-        res.send(hr_model)
+        .then(response => {res.send(hr_model)})
+        .catch(err => {console.log(err)})
+        
     }
-    })
+    else{
+        res.send("Access denied! You must be a HR member!")
+    }
 
-router.route('/HR/Attendance/:id')
+})
+
+///////////////////////////////MANUALLY ADD A MISSING SIGNIN/SIGNOUT/////////////////////////////////////////
+
+
+////////////////////////////////////VIEW ATTENDANCE/////////////////////////////////////////
+
+router.route('/HR/viewAttendance/:id')
 .get(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     const academicmember= await HR.find({id:req.params.id})
@@ -1279,10 +1441,11 @@ router.route('/HR/Attendance/:id')
 }
     })
 
+//////////////////////////////////VIEW MISSING HOURS/DAYS/////////////////////////////////////////
 
-router.route('/HR/Attendance_missinghoursdays')
+router.route('/HR/viewAttendanceMissingHoursDays')
 .get(tokenVerification, async( req,res)=>{
-    if(req.data.role !== "HR"){
+    if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
     const users = await HR.find()
@@ -1299,6 +1462,57 @@ res.send(result)
     }
     })   
 
+//////////////////////////////////////UPDATE SALARY/////////////////////////////////////////
+
+router.route('/HR/updateAcademicmemberSalary')
+    .put(async( req,res)=>{
+        if(req.data.role.toLowerCase() !== "hr"){
+            res.send("Access denied! You must be a HR member!")
+        }
+        else{
+            var academic =await Academic_Member.find({id:req.body.id})
+        if(academic.length===0){
+            return res.send("this id doesn't exist")
+        }
+        academic[0].salary=req.body.salary
+        const academic77=new Academic_Member({
+            id:academic[0].id,
+                name : academic[0].name, 
+                email: academic[0].email,
+                password: academic[0].password,
+                salary: academic[0].salary,
+                department_name:academic[0].department_name,
+                faculty_name: academic[0].faculty_name,
+                room_location_id: academic[0].room_location_id,
+                HOD: academic[0].HOD,
+                Coordinator: academic[0].Coordinator,
+                role: academic[0].role,
+                gender: academic[0].gender,
+                courses_taught: academic[0].courses_taught,
+                assign_slots: academic[0].assign_slots,
+                schedule: academic[0].schedule,
+                Phone_Number: academic[0].Phone_Number,
+                Attendance: academic[0].Attendance,
+                annual_balance:academic[0].annual_balance,
+                accidental_balance:academic[0].accidental_balance,
+                isNewMember:academic[0].isNewMember,
+                Notification:academic[0].Notification,
+                putInVisa:academic[0].putInVisa
+
+          
+        })
+        await Academic_Member.findOneAndRemove({id:req.body.id})
+        //  console.log(academic[0].salary)
+        await academic77.save().then(doc => {
+             res.send(doc);
+         })
+         .catch(err => {
+         console.error(err)
+         })
+     
+        }
+
+   })
 
 
 
