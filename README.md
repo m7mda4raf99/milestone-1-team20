@@ -161,17 +161,17 @@
    #### A) HOD Functionalities
    
         1.Functionality:Assign a course instructor. 
-          Route:/Academic_Member/assign_course_instructor
+          Route:/HOD/assign_course_instructor
           Request type: POST
           Request body: /////////////////////////////////////// 
           
         2.Functionality:Delete a course instructor. 
-          Route:/Academic_Member/delete_course_instructor
+          Route:/HOD/delete_course_instructor
           Request type: DELETE
           Request body: /////////////////////////////////////// 
    
         3.Functionality:Update a course instructor. 
-          Route: /Academic_Member/update_course_instructor/:id
+          Route: /HOD/update_course_instructor/:id
           Request type: PUT
           Parameters: id is the id of the Course Instructor we are getting his/her info
           Example of how to call the route: /////////////////////////////    
@@ -183,9 +183,48 @@
    
    #### B) Course Instructor Functionalities
    
-   
+        1.Functionality: View the coverage of course(s) Staff Member assigned to.
+          Route:/Instructor/viewCoverages
+          Request type: GET
+          Response: Array of Coverage Of Courses Staff Member assigned to. Example of a single Coverage Of Courses Staff Member assigned to: { ///////////////// }
 
-
+        2.Functionality: View the slots’ assignment of course(s) Staff Member assigned to.
+          Route:/Instructor/viewCoursesSlots
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        3.Functionality: View all the staff in his/her department or per course along with their profiles.
+          Route:/Instructor/viewStaffProfiles
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        4.Functionality: Assign an academic member to an unassigned slots in course(s) he/she is assigned to.
+          Route:/Instructor/assignAcademicToSlot
+          Request type: POST
+          Request body: ///////////////////////////////////////   
+         
+        5.Functionality: Update assignment of academic member in course(s) he/she is assigned to.
+          Route:/Instructor/updateAcademicSlot
+          Request type: PUT
+          Request body: ///////////////////////////////////////    
+          
+        6.Functionality: Delete assignment of academic member in course(s) he/she is assigned to.
+          Route:/Instructor/deleteAcademicSlot
+          Request type: DELETE
+          Request body: ///////////////////////////////////////
+          
+        7.Functionality: Remove an assigned academic member in course(s) he/she is assigned to.
+          Route:/Instructor/removeAcademicSlot
+          Request type: DELETE
+          Request body: ///////////////////////////////////////
+          
+        8.Functionality: Assign an academic member in each of his/her course(s) to be a course coordinator. 
+          Route:/Instructor/assignAcademicCoordinator
+          Request type: POST
+          Request body: /////////////////////////////////////// 
+          
+          
+          
 
 
 
