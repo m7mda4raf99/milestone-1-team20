@@ -160,8 +160,22 @@
    ### Academic Members Functionalities
    #### A) HOD Functionalities
    
+        1.Functionality:Assign a course instructor. 
+          Route:/Academic_Member/assign_course_instructor
+          Request type: POST
+          Request body: /////////////////////////////////////// 
+          
+        2.Functionality:Delete a course instructor. 
+          Route:/Academic_Member/delete_course_instructor
+          Request type: DELETE
+          Request body: /////////////////////////////////////// 
    
-   
+        3.Functionality:Update a course instructor. 
+          Route: /Academic_Member/update_course_instructor/:id
+          Request type: PUT
+          Parameters: id is the id of the Course Instructor we are getting his/her info
+          Example of how to call the route: /////////////////////////////    
+
    
    
    
