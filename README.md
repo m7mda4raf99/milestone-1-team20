@@ -175,9 +175,40 @@
           Request type: PUT
           Parameters: id is the id of the Course Instructor we are getting his/her info
           Example of how to call the route: /////////////////////////////    
-
-          .............TO BE CONTINUE............
-   
+          
+        4.Functionality: View all the staff in his/her department or per course along with their profiles.
+          Route: /////////////////////////////////////////
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        5.Functionality: View the day off of all the staff in his/her department.
+          Route: /HOD/viewstaff
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        6.Functionality: View the day off of a single staff in his/her department.
+          Route:/HOD/viewstaff/:id
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          Parameters: id is the id of the staff Instructor we are getting his/her info
+          Example of how to call the route: /////////////////////////////    
+          
+        7.Functionality: Accept/reject a request.
+          Route: /HOD/all_requests
+          Request type: PUT
+          Request body: /////////////////////////////////////// 
+          
+        8.Functionality: View the coverage of each course in his/her department.
+          Route: /HOD/coursecoverage
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        9.Functionality: View teaching assignments of course offered by his department.
+          Route:/HOD/staffmembersteachingslots/:course
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          Parameters: course is the /////////////// we are getting its info
+          Example of how to call the route: /////////////////////////////    
    
    
    
