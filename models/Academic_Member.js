@@ -86,7 +86,5 @@ const academicMemberSchema = new mongoose.Schema({
     }
 })
 
-
-
-
 module.exports = mongoose.model('Academic Member', academicMemberSchema)
+

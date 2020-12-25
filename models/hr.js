@@ -32,7 +32,7 @@ const hrSchema = new mongoose.Schema({
     gender: {
         type: String
     },
-    Phone_Number: {
+    Phone_Number: { 
         type:String
     },
     isNewMember: {
