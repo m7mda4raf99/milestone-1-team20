@@ -295,87 +295,86 @@
   #### D) Academic member Functionalities
   
         1.Functionality: View Academic member schedule. Schedule should show teaching activities and replacements if present.
-          Route: /Academic_Member/view_academic_member_schedule/:id
+          Route: /Academic_Member/view_academic_member_schedule
           Request type: GET
-          Parameters: id is the ID of the Academic member we are getting his info
-          Example of how to call the route:////////////////////////////////////////////////
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
-
-        2.Functionality: Send “replacement” request(s). 
+          Example of how to call the route: /Academic_Member/view_academic_member_schedule
+        xxx  Response: Array of schedule of this academic. Example of a single schedule:{"course_id":"CSEN701","day":"Monday,"room_location_id":"c7.306","which_slot":2,"academic_member_id":"509"}
+   
+  
+        2.Functionality: Send “replacement” request(s).
           Route: /Academic_Member/send_replacement_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-27","destination_id":"43-1684"}
           
         3.Functionality: View “replacement” request(s).
           Route: /Academic_Member/view_all_replacement_requests
           Request type: GET
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          Response: Array of Requests. Example:{["id":"R2","target_day":"2020-12-27","date_of_request":2020-12-25T21:12:54.260Z,"type_of_request":"replacement","status_of_request":"pending","sender_id":"8001","destination_id":"1102","document":""]}
           
         4.Functionality: Send a “slot linking” request. 
-          Route: /Academic_Member/send_slot-linking_request
-          Request type: POST
-          Request body: ///////////////////////////////////////
+          Route: /AcademicMember/sendSlotLinkingRequest
+          Request type: POST:
+          Request body: {"course_id":"CSEN704","target_day":"2020-12-30","slot_day":"Monday","which_slot":3}
           
         5.Functionality: Send a “change day off” request. 
           Route: /Academic_Member/send_change_day_off_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30","document":""}
           
         6.Functionality: Submit annual leave request. 
           Route: /Academic_Member/submit_annual_leave_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30"}
           
         7.Functionality: Submit sick leave request. 
           Route: /Academic_Member/submit_sick_leave_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30","document":"a google drive link with the proper documents uploded on it"}
           
         8.Functionality: Submit accidental leave request. 
           Route: /Academic_Member/submit_accidental_leave_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30","document":"a google drive link with the proper documents uploded on it"}
           
-        9.Functionality: Submit compensation request request. 
+        9.Functionality: Submit compensation request. 
           Route: /Academic_Member/submit_compensation_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30","reason_of_compensation":"I had a severe flu and headache"}
           
-       10.Functionality: Submit maternity request request. 
+       10.Functionality: Submit maternity request. 
           Route: /Academic_Member/submit_maternity_request
           Request type: POST
-          Request body: ///////////////////////////////////////
+          Request body: {"target_day":"2020-12-30","document":"a google drive link with the proper documents uploded on it"}
           
        11.Functionality: Notified requests status.
           Route: /Academic_Member/view_status_of_all_requests
           Request type: GET
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          Response: Array of status of all requests. Example{["id":"R5","target_day":"2020-12-27","date_of_request":2020-12-25T21:12:54.260Z,"type_of_request":"replacement","status_of_request":"pending","sender_id":"8001","destination_id":"1102","document":""],[["id":"R9","target_day":"2020-12-24","date_of_request":"2020-12-29","type_of_request":"replacement","status_of_request":"pending","sender_id":"8001","destination_id":"1102","document":""]]}
           
        12.Functionality: View Accepted Requests.
           Route: /Academic_Member/view_accepted_requests
           Request type: GET
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
-          
+          Response: Array of all accepted requests. Example: {["id":"R2","target_day":"2020-12-27","date_of_request":2020-12-25T21:12:54.260Z,"type_of_request":"replacement","status_of_request":"accepted","sender_id":"8001","destination_id":"1102","document":""]}
+
        13.Functionality: View Pending Requests.
           Route: /Academic_Member/view_pending_requests
           Request type: GET
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          Response: Array of all pending requests. Example: {["id":"R2","target_day":"2020-12-27","date_of_request":2020-12-25T21:12:54.260Z,"type_of_request":"replacement","status_of_request":"pending","sender_id":"8001","destination_id":"1102","document":""]}
           
        14.Functionality: View Rejected Requests.
           Route: /Academic_Member/view_rejected_requests
           Request type: GET
-          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          Response: Array of all rejected results. Example: {["id":"R2","target_day":"2020-12-27","date_of_request":2020-12-25T21:12:54.260Z,"type_of_request":"replacement","status_of_request":"rejected","sender_id":"8001","destination_id":"1102","document":""]}
           
        15.Functionality: Cancel a request whose day is yet to come.
           Route: /Academic_Member/cancel_day_is_yet_to_come_requests
           Request type: DELETE
-          Request body: ///////////////////////////////////////  
+          Request body: {"id":"R5"}
           
        16.Functionality: Cancel a still pending request.
           Route: /Academic_Member/cancel_pending_requests
           Request type: DELETE
-          Request body: ///////////////////////////////////////  
-          
+          Request body: {"id":"R7"} 
           
           
           
