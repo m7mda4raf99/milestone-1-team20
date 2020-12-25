@@ -34,4 +34,4 @@ const requestsSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('requests', requestsSchema)
+module.exports = mongoose.model('Request', requestsSchema)

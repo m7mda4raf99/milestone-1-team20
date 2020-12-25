@@ -1,10 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-//const Department = require('./Department').schema
-//const Faculty = require('./Faculty').schema;
-//const room_location = require('./room_Location').schema;
-const Slot = require('./slot').schema;
 const Attendance = require('./Attendance').schema;
+const Notification = require('./Notifications').schema;
 
 
 const academicMemberSchema = new mongoose.Schema({
@@ -20,23 +17,24 @@ const academicMemberSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true  
-        
+        unique: true        
     },
     password: {
-        type: String,
-        default: 123456
+        type: String
     },
     salary: {
         type: Number,
         required: true  
+    },
+    putInVisa:{
+        type:Number,
+        default:0
     },
     department_name: {
         type: String
     },
     faculty_name: {
         type: String
-        
     },
     room_location_id: {
         type: String,
@@ -68,12 +66,27 @@ const academicMemberSchema = new mongoose.Schema({
     Phone_Number: {
         type:String
     },
+    annual_balance:{
+        type:Number,
+        default: 0
+    },
+    accidental_balance:{
+        type:Number,
+        default: 0
+    },
     Attendance : {
         type: Attendance
+    },
+    isNewMember: {
+        type: Boolean,
+        default: true
+    },
+    Notification:{
+        type: Notification
     }
 })
 
 
 
 
-module.exports = mongoose.model('Academic Member ashaf 5arya m7dsh yegy gmb kosomha', academicMemberSchema)
+module.exports = mongoose.model('Academic Member', academicMemberSchema)

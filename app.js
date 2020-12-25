@@ -23,6 +23,24 @@ app.use('',Academic_Member_routes)
 app.use('',HOD_routes)
 
 
+// var signIn = [] 
+// var signOut = []
+
+// function In(number){
+//     signIn.push(number)
+//     signOut.push(undefined)
+// }
+
+
+// function Out(number){
+//     if(signOut[signOut.length-1]){
+//         signOut.push(number)
+//         signIn.push(undefined)
+//     }else{
+//         signOut[signOut.length-1] = number
+//     }
+// }
+
 
 module.exports.app = app 
 

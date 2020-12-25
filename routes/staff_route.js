@@ -12,11 +12,11 @@ const Slot = require('../models/slot')
 const Blocklist = require('../models/Blocklist')
 const room_location = require('../models/room_Location')
 const Attendance =require('../models/Attendance')
+const { response } = require('express')
 
 //var blockList = []
 var signIn
 var signOut
-var name = "ashraf"
 var dateOfToday = ""
 var days =["sunday","monday","tuesday","wednesday","thursday","friday"]
 
@@ -49,27 +49,8 @@ const tokenVerification = async (req,res,next) => {
       }
 }
 
-// var flag = true
-// var oldHour = new Date().getHours()    
-
-// var intervalID = setInterval(function(){
-//         var date = new Date()
-    
-//         console.log("oldHour: " + oldHour)
-//         console.log("date: " + date.getHours())
-
-//         if(oldHour !== date.getHours()){
-//             oldHour = date.getHours()
-//             flag = true
-//         }
-//         if(date.getHours() === 19 && flag){
-//             console.log("hesham")
-//             flag = false
-//         }
-// }, 1000);
-
+//////////////////////////////PERIODIC FUNCTION EVERYDAY AT 7:00 PM/////////////////////////////
 var flag = true
-
 var intervalID = setInterval(function(){
     var oldHour = new Date().getHours()    
         var date = new Date()
@@ -87,59 +68,179 @@ var intervalID = setInterval(function(){
 async function everyDay(){
     dateOfToday = new Date(Date.now())
 
-    const academicrocords = await Academic_Member.find()
-    for(var i=0;i<academicrocords.length;i++){
-        //member forgets to signOUT
-        if(academicrocords[i].Attendance.SignedIn===1){
-            academicrocords[i].Attendance.signOut.push(academicrocords[i].Attendance.signIn)
-            academicrocords[i].Attendance.SignedIn=0
+    const staff = await Academic_Member.find()
+    for(var i=0;i<staff.length;i++){
+        
+        //calculating hours, minutes and total_hours_minutes
+        var whenSignIn = 0 
+        var whenSignOut = 0
+        var total_hours_minutes =0
+
+        for(var j=0; j< staff[i].Attendance.signIn.length; j++){
+            if(staff[i].Attendance.signIn[j] && staff[i].Attendance.signOut[j]){
+                if (dateOfToday.toISOString().slice(0,10) ===
+                staff[i].Attendance.signIn[j].toISOString().slice(0,10)){  
+                    whenSignIn = staff[i].Attendance.signIn[j] 
+                    whenSignOut = staff[i].Attendance.signOut[j]                         
+                    total_hours_minutes += (whenSignOut-whenSignIn) / 1000 / 60 / 60
+                }
+            }
+           
         }
 
-        //if today is the dayOff of the member 'i'
-        
-        if(academicrocords[i].Attendance.dayOff.toLowerCase() === days[dateOfToday.getDay()]){
-           
-            for(var j = 0;j<academicrocords[i].Attendance.signIn.length;j++){
-                
-                var hours = Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)
-                var minutes=academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60-(Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)*60)
-                var total_hours_minutes=hours+minutes/60
-               
-                if (dateOfToday.toISOString().slice(0,10)===
-                      academicrocords[i].Attendance.signIn[j].toISOString().slice(0,10)){
-                    academicrocords[i].Attendance.acceptedMissingHours -= hours
-                    academicrocords[i].Attendance.acceptedMissingMinutes -= minutes
-                    academicrocords[i].Attendance.spentHoursPerMonth[j] += total_hours_minutes 
-                }
-
+        //if this day is a dayOff
+        if(staff[i].Attendance.dayOff.toLowerCase() === days[dateOfToday.getDay()]){
+            //if he requests for a leave and it is accepted
+            if(false){
 
             }
-      }else{
-          if(hours===0&&minutes===0){
-            academicrocords[i].Attendance.missingDays[j]+=1
-          }
-          else if(total_hours_minutes<7.4){
-              if(minutes < 24){
-                academicrocords[i].Attendance.missingHours[j]= 8 - hours
-                academicrocords[i].Attendance.missingMinutes[j] = 24 - minutes
-              }else{
-                academicrocords[i].Attendance.missingHours[j]= 8 - hours - 1
-                academicrocords[i].Attendance.missingMinutes[j] = minutes - 24
-              }
 
-          }else if (7.4 <= total_hours_minutes && 8.4 >= total_hours_minutes){
-
-          }else{
-
-          }
+            //no leave request 
+            else{
+                staff[i].Attendance.extraHours += Math.floor(total_hours_minutes)
+                staff[i].Attendance.extraMinutes += (total_hours_minutes - Math.floor(total_hours_minutes))*60
+                staff[i].Attendance.spentHoursPerMonth += total_hours_minutes
+            }
 
         }
+        //if this day is not a dayOff
+        else{
+            if(total_hours_minutes===0){
+                staff[i].Attendance.missingDays++
+            }
+            else if(total_hours_minutes < 8.4){
+                staff[i].Attendance.missingHours += Math.floor(8.4-total_hours_minutes)
+                staff[i].Attendance.missingMinutes += (8.4-total_hours_minutes- staff[i].Attendance.missingHours)*60
+                staff[i].Attendance.spentHoursPerMonth += total_hours_minutes
+            }
+            else{
+                staff[i].Attendance.extraHours += Math.floor(total_hours_minutes - 8.4)
+                staff[i].Attendance.extraMinutes += (total_hours_minutes- 8.4 - staff[i].Attendance.extraHours)*60
+                staff[i].Attendance.spentHoursPerMonth += total_hours_minutes
+
+            }
+
+        }
+
+
+
+
+
+
+
+    //if today is the dayOff of the member i
+        
+    //     if(academicrocords[i].Attendance.dayOff.toLowerCase() === days[dateOfToday.getDay()]){
+           
+    //         for(var j = 0;j<academicrocords[i].Attendance.signIn.length;j++){
+                
+    //             var hours = Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)
+    //             var minutes=academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60-(Math.floor( academicrocords[i].Attendance.signOut[j]-academicrocords[i].Attendance.signIn[j]/1000/60/60)*60)
+    //             var total_hours_minutes=hours+minutes/60
+               
+    //             if (dateOfToday.toISOString().slice(0,10)===
+    //                   academicrocords[i].Attendance.signIn[j].toISOString().slice(0,10)){
+    //                 academicrocords[i].Attendance.acceptedMissingHours -= hours
+    //                 academicrocords[i].Attendance.acceptedMissingMinutes -= minutes
+    //                 academicrocords[i].Attendance.spentHoursPerMonth[j] += total_hours_minutes 
+    //             }
+
+
+    //         }
+    //   }else{
+    //       if(hours===0&&minutes===0){
+    //         academicrocords[i].Attendance.missingDays[j]+=1
+    //       }
+    //       else if(total_hours_minutes<7.4){
+    //           if(minutes < 24){
+    //             academicrocords[i].Attendance.missingHours[j]= 8 - hours
+    //             academicrocords[i].Attendance.missingMinutes[j] = 24 - minutes
+    //           }else{
+    //             academicrocords[i].Attendance.missingHours[j]= 8 - hours - 1
+    //             academicrocords[i].Attendance.missingMinutes[j] = minutes - 24
+    //           }
+
+    //       }else if (7.4 <= total_hours_minutes && 8.4 >= total_hours_minutes){
+
+    //       }else{
+
+    //       }
+
+    //     }
+
+
 
         
     }
 }
 
-//routes
+/////////////////////PERIODIC FUNCTION EVERY 10TH DAY OF EACH MONTH AT 7:00 PM//////////////////
+var flag2 = true
+var intervalID2 = setInterval(function(){
+    var oldHour = new Date().getHours()    
+        var date = new Date()
+        if(oldHour !== date.getHours()){
+            oldHour = date.getHours()
+            flag2 = true
+        }
+        if(date.getDate() === 10 && date.getHours() === 19 && flag2){
+            everyTenthDayOfEachMonth()
+            flag2 = false
+        }
+
+}, 1000)
+
+async function everyTenthDayOfEachMonth(){
+    var staff = await Academic_Member.find()
+
+    for(var i=0; staff.length; i++){
+        await Academic_Member.findOneAndRemove({id: staff[i].id})
+
+        if(staff[i].Attendance.missingHours + (staff[i].Attendance.missingMinutes/ 60) > 
+        staff[i].Attendance.extraHours + (staff[i].Attendance.extraMinutes/ 60)){
+            staff[i].putInVisa = staff[i].salary - (staff[i].salary/60) * staff[i].Attendance.missingDays
+             - (staff[i].salary/180) * staff[i].Attendance.missingHours - (staff[i].salary/(180*60)) * 
+             staff[i].Attendance.missingMinutes  
+        }else{
+            staff[i].putInVisa = staff[i].salary  
+        }
+
+        staff[i].annual_balance += 2.5
+
+        const Academic_membermodel=  new Academic_Member({
+            id:staff[i].id,
+            name : staff[i].name, 
+            email: staff[i].email,
+            password: staff[i].password,
+            salary:staff[i].salary,
+            department_name:staff[i].department_name,
+            faculty_name:staff[i].faculty_name,
+            room_location_id:staff[i].room_location_id,
+            HOD: staff[i].HOD,
+            Coordinator:staff[i].Coordinator,
+            role:staff[i].role,
+            gender:staff[i].gender,
+            courses_taught:staff[i].courses_taught,
+            assign_slots:staff[i].assign_slots,
+            schedule: staff[i].schedule,
+            Phone_Number:staff[i].Phone_Number,
+            annual_balance: staff[i].annual_balance,
+            accidental_balance: staff[i].accidental_balance,
+            Attendance:staff[i].Attendance,
+            isNewMember: staff[i].isNewMember,
+            Notification: staff[i].Notification,
+            putInVisa: staff[i].putInVisa
+        })
+
+        Academic_membermodel.save()
+        .then(response => {})
+        .catch(err => {console.log(err)})
+
+    }
+    
+}
+
+
 ///////////////////////////////////////////////LOGIN////////////////////////////////////////////
 router.route('/staff/userLogin')
 .post(async(req,res)=>{
@@ -181,229 +282,141 @@ router.route('/staff/logout')
     //console.log(blockList)
     //if((blockList.filter((token)=>token === req.headers.token)).length !== 0){
         const blockList = await Blocklist.find({name: req.headers.token})
+
     if(blockList.length !==0 ){
         res.send('You are already logged out')
     }
     else{
       
-
         //blockList.push(req.headers.token)
-        const newBlockcontent = new Blocklist({
+        const 
+        Blockcontent = new Blocklist({
             name: req.headers.token
         })
         await newBlockcontent.save()
-        
-        res.send('You logged out successfully')
+        .then(response => {res.send('You logged out successfully')}).catch(err => {console.log(err)})
+
+    
     }
 })
 
-///////////////////////////////////////////////VIEW PROFILE////////////////////////////////////////////
+///////////////////////////////////////////VIEW PROFILE////////////////////////////////////////////
 router.route('/staff/viewProfile')
 .get(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
+
     if(AcademicUser.length !== 0){
-        var ScheduleResult = ""
-        if(AcademicUser[0].schedule){
-            for(var i=0;i<AcademicUser[0].schedule.length;i++){
-                ScheduleResult += "Course ID: "+(AcademicUser[0].schedule[0].course_id) + ", " +
-                "Day: " +(AcademicUser[0].schedule[0].day) + ", " +
-                "Slot: " +    (AcademicUser[0].schedule[0].which_slot + "th") + ", " +
-                "Room Location: " +          (AcademicUser[0].schedule[0].room_location_id) + "\n"
-
-            }
-        }
-        var AttendanceResult = "Attendance: \n"
-        if(AcademicUser[0].Attendance){
-            AttendanceResult += 
-            "Dayoff: " + AcademicUser[0].Attendance.dayOff + "\n" +
-            "Sign In: " + AcademicUser[0].Attendance.signIn + "\n" + 
-            "Sign Out: " + AcademicUser[0].Attendance.dayOff + "\n" +   
-             "Dayoff: " + AcademicUser[0].Attendance.dayOff + "\n" +
-            "Spent Hours per Month: " + AcademicUser[0].Attendance.spentHoursPerMonth + "\n" +  
-            "Missed Days: " + AcademicUser[0].Attendance.missingDays + "\n" +  
-            "Missed Hours: " + AcademicUser[0].Attendance.missingHours + "\n" +
-            "Missed minutes: " + AcademicUser[0].Attendance.missingMinutes + "\n" 
-
-             }
-
-        res.send("ID: " + AcademicUser[0].id + "\n"+
-                 "Name: " + AcademicUser[0].name + "\n" +
-                 "Password: " + AcademicUser[0].password + "\n"+
-                 "Phone Number: " + AcademicUser[0].Phone_Number + "\n" +
-                 "Salary: " + AcademicUser[0].salary + "\n"+
-                 "Department: " + AcademicUser[0].department_name + "\n"+
-                 "Faculty: " + AcademicUser[0].faculty_name + "\n"+
-                 "Room Location: " + AcademicUser[0].room_location_id + "\n"+
-                 "Head of Department: " + AcademicUser[0].HOD + "\n"+
-                 "Coordinator: " + AcademicUser[0].Coordinator + "\n"+
-                 "Role: " + AcademicUser[0].role + "\n"+
-                 "Gender: " + AcademicUser[0].gender + "\n"+
-                 "Courses Taught: " + AcademicUser[0].courses_taught + "\n"+
-                 "Assign Slots: " + AcademicUser[0].assign_slots + "\n"+
-                 "Schedule: " + ScheduleResult  + 
-                 AttendanceResult
-                 
-                   )
+       res.send(AcademicUser[0])
  
     }else{
         const HRUser = await HR.find({id: req.data.id})
-        res.send("ID: " + HRUser[0].id + "\n"+
-        "Name: " + HRUser[0].name + "\n" +
-        "Password: " + HRUser[0].password + "\n"+
-        "Phone Number: " + AcademicUser[0].Phone_Number + "\n" +
-        "Salary: " + HRUser[0].salary + "\n"+
-        "Room Location: " + HRUser[0].room_location_id + "\n"+
-        "Role: " + HRUser[0].role + "\n"+
-        "Gender: " + HRUser[0].gender + "\n"
-          )
-
-        
+        if(HRUser.length !== 0){
+            res.send(HRUser[0])
+        }else{
+            res.send("There is no academic member with this id")
+        }      
     }
 
 
 })
 
-///////////////////////////////////////////////UPDATE PROFILE////////////////////////////////////////////
+////////////////////////////////////////////UPDATE PROFILE////////////////////////////////////////
 router.route('/staff/updateProfile')
 .put(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
+
     if(AcademicUser.length !== 0){
-        Academic_Member.findOneAndRemove({
-           id:AcademicUser[0].id
-        })
+        Academic_Member.findOneAndRemove({id:AcademicUser[0].id})
+
         if(req.body.email){
             AcademicUser[0].email = req.body.email
-            await AcademicUser[0].save().then(doc => {
-                res.send(doc);
-            })
-            .then(response => {
-                console.log(response)
-                res.send(response)
-                })
-                .catch(err => {
-                console.error(err)
-                })
+            await AcademicUser[0].save()
+            .then(response => {}).catch(err => {console.log(err)})
+
         }if(req.body.Phone_Number){
             AcademicUser[0].Phone_Number = req.body.Phone_Number
-            await AcademicUser[0].save().then(doc => {
-                res.send(doc);
-            })
-            .then(response => {
-                //console.log(response)
-                res.send(response)
-                })
-                .catch(err => {
-                console.error(err)
-                })
+            await AcademicUser[0].save()
+            .then(response => {}).catch(err => {console.log(err)})
+
         }if(req.body.password){
             const salt = await bcrypt.genSalt(10)
             const hashedPassword = await bcrypt.hash(req.body.password,salt)
 
             AcademicUser[0].password = hashedPassword
-            await AcademicUser[0].save().then(doc => {
-                res.send(doc);
-            })
-            .then(response => {
-                //console.log(response)
-                res.send(response)
-                })
-                .catch(err => {
-                console.error(err)
-                })
+            await AcademicUser[0].save()
+            .then(response => {}).catch(err => {console.log(err)})
+
         }
         
+        res.send("Updated successfully!")
 
     }else{
         const HRUser = await HR.find({id: req.data.id})
-            HR.findOneAndRemove({
-               id:HRUser[0].id
-            })
+
+            HR.findOneAndRemove({id:HRUser[0].id})
+
             if(req.body.email){
                 HRUser[0].email = req.body.email
-                await HRUser[0].save().then(doc => {
-                    res.send(doc);
-                })
-                .then(response => {
-                    console.log(response)
-                    res.send(response)
-                    })
-                    .catch(err => {
-                    console.error(err)
-                    })
+                await HRUser[0].save()
+                .then(response => {}).catch(err => {console.log(err)})
+
             }if(req.body.Phone_Number){
                 HRUser[0].Phone_Number = req.body.Phone_Number
-                await HRUser[0].save().then(doc => {
-                    res.send(doc);
-                })
-                .then(response => {
-                    //console.log(response)
-                    res.send(response)
-                    })
-                    .catch(err => {
-                    console.error(err)
-                    })
+                await HRUser[0].save()
+                .then(response => {}).catch(err => {console.log(err)})
+
             }if(req.body.password){
                 const salt = await bcrypt.genSalt(10)
                 const hashedPassword = await bcrypt.hash(req.body.password,salt)
 
                 HRUser[0].password = hashedPassword
-                await HRUser[0].save().then(doc => {
-                    res.send(doc);
-                })
-                .then(response => {
-                    //console.log(response)
-                    res.send(response)
-                    })
-                    .catch(err => {
-                    console.error(err)
-                    })
-            }
-            
+                await HRUser[0].save()
+                .then(response => {}).catch(err => {console.log(err)})
 
-        
+            }
+            res.send("Updated successfully!")
+
     }
 
 })
   
-///////////////////////////////////////////////RESET PASSWORD////////////////////////////////////////////
+////////////////////////////////////////////RESET PASSWORD///////////////////////////////////////
 router.route('/staff/resetPassword')
 .put(tokenVerification,async(req,res)=>{
     const AcademicUser = await Academic_Member.find({id: req.data.id})
+
     if(AcademicUser.length !== 0){
-        Academic_Member.findOneAndRemove({
-            id:AcademicUser[0].id
-         })
+        Academic_Member.findOneAndRemove({id:AcademicUser[0].id})
+
          if(req.body.password){
             const salt = await bcrypt.genSalt(10)
             const hashedPassword = await bcrypt.hash(req.body.password,salt)
     
             AcademicUser[0].password = hashedPassword
-            await AcademicUser[0].save().then(doc => {
-                res.send("Password is updated successfully!");
-            })
-            .catch(err => {
-                console.error("Error has occured. Please try again!")
-            })  
+            AcademicUser[0].isNewMember = false
+            await AcademicUser[0].save()
+            .then(response => {res.send("Password is updated successfully!")})
+            .catch(err => {console.error("Error has occured. Please try again!")})
         
+
         }
     
     }else{
         const HRUser = await HR.find({id: req.data.id})
+        
         if(HRUser){
-            HR.findOneAndRemove({
-               id:HRUser[0].id
-            })
+            HR.findOneAndRemove({id:HRUser[0].id})
+
             if(req.body.password){
                 const salt = await bcrypt.genSalt(10)
                 const hashedPassword = await bcrypt.hash(req.body.password,salt)
         
                 HRUser[0].password = hashedPassword
-                await HRUser[0].save().then(doc => {
-                    res.send("Password is updated successfully!");
-                })
-                .catch(err => {
-                    console.error("Error has occured. Please try again!")
-                    })
+                HRUser[0].isNewMember = false
+                await HRUser[0].save()
+                .then(response => {res.send("Password is updated successfully!")})
+                .catch(err => {console.error("Error has occured. Please try again!")})
+
             }
     }
 }
@@ -420,14 +433,8 @@ router.route('/staff/signIn')
 
     signIn = new Date(Date.now())
 
-    console.log(user[0])
-
-    if(user[0].Attendance.SignedIn === 0){
-        user[0].Attendance.signIn.push(signIn)
-        user[0].Attendance.SignedIn = 1 
-    }else{
-        res.send("Sorry, you are already signed in!")
-    }
+    user[0].Attendance.signIn.push(signIn)
+    user[0].Attendance.signOut.push(undefined)
 
     const Academic_membermodel=  new Academic_Member({
         id:user[0].id,
@@ -446,12 +453,16 @@ router.route('/staff/signIn')
         assign_slots:user[0].assign_slots,
         schedule: user[0].schedule,
         Phone_Number:user[0].Phone_Number,
-        Attendance:user[0].Attendance
-
+        annual_balance: user[0].annual_balance,
+        accidental_balance: user[0].accidental_balance,
+        Attendance:user[0].Attendance,
+        isNewMember: user[0].isNewMember,
+        Notification: user[0].Notification,
+        putInVisa: user[0].putInVisa
     })
 
     await Academic_membermodel.save()
-    res.send("You signed in successfully!")
+    .then(response => {res.send("You signed in successfully!")}).catch(err => {console.log(err)})
 
 })
 
@@ -465,12 +476,11 @@ router.route('/staff/signOut')
 
     signOut = new Date(Date.now())
 
-
-    if(user[0].Attendance.SignedIn === 1){
+    if(user[0].Attendance.signOut[user[0].Attendance.signOut.length-1]){
         user[0].Attendance.signOut.push(signOut)
-        user[0].Attendance.SignedIn = 0
+        user[0].Attendance.signIn.push(undefined)
     }else{
-        res.send("Sorry, you are already signed out!")
+        user[0].Attendance.signOut[user[0].Attendance.signOut.length-1] = signOut
     }
 
     const Academic_membermodel=  new Academic_Member({
@@ -490,229 +500,69 @@ router.route('/staff/signOut')
         assign_slots:user[0].assign_slots,
         schedule: user[0].schedule,
         Phone_Number:user[0].Phone_Number,
-        Attendance:user[0].Attendance
-
+        annual_balance: user[0].annual_balance,
+        accidental_balance: user[0].accidental_balance,
+        Attendance:user[0].Attendance,
+        isNewMember: user[0].isNewMember,
+        Notification: user[0].Notification,
+        putInVisa: user[0].putInVisa
     })
 
     await Academic_membermodel.save()
-    res.send("You signed out successfully!")
+    .then(response => {res.send("You signed out successfully!")}).catch(err => {console.log(err)})
+
 
 })
 
 
+///////////////////////////////////////////////VIEW ATTENDANCE////////////////////////////////////////////
+router.route('/staff/viewAttendance')
+.get(tokenVerification, async (req,res) => {
+    const staff = await Academic_Member.find({id: req.data.id})
 
+    var arraySignIn
+    var arraySignOut
 
+    if(req.body.month){
+        for(var i=0; i< staff[0].Attendance.signIn.length; i++){
+            if(staff[0].Attendance.signIn[i]){
+                if(staff[0].Attendance.signIn[i].getMonth() + 1 === req.body.month){
+                    arraySignIn.push(staff[0].Attendance.signIn[i])
+                    arraySignOut.push(staff[0].Attendance.signOut[i])
+                }
+            }else{
+                if(staff[0].Attendance.signOut[i]){
+                    if(staff[0].Attendance.signOut[i].getMonth() + 1 === req.body.month){
+                        arraySignIn.push(staff[0].Attendance.signIn[i])
+                        arraySignOut.push(staff[0].Attendance.signOut[i])
+                    }
+                }
+            }
+        }
+    }
+    else{
+        arraySignIn = staff[0].Attendance.signIn
+        arraySignOut = staff[0].Attendance.signOut
+    }
 
-////////////////////////////////////////////INSERTING IN DATABASE//////////////////////////////////////////////
-router.route('/staff/addAcademicMember')
-.post(async (req,res)=>{    
-    const slot = new Slot({
-        
-            course_id:"CSEN701",
-            day: "Tuesday",
-            which_slot: 1,
-            room_location_id: "C7.301"
-           
-        
-    })
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash("ashraf123",salt)
-    const newM = new Academic_Member({
-        id: "43-108711",
-        name: "Mohamed Ashraf",
-        email: "m11@gmail.com",
-        password: hashedPassword,
-        salary: 5000000,
-        department_name: "MET",
-        faculty_name: "Engineering",   
-        room_location_id:"C5.201",
-        role:"TA",
-        courses_taught: ["CSEN701"],
-        assign_slots: [1],
-        schedule: [slot]
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
+    res.send({"signIn": arraySignIn, "signOut": arraySignOut})
 })
-router.route('/staff/addAttendance')
-.post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10871",
-        name: "Mohamed Ashraf",
-        email: "m1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        faculty_name: "Engineering",   
-        room_location_id:"C5.201",
-        role:"TA"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
 
+///////////////////////////////////////////////VIEW MISSING DAYS////////////////////////////////////////////
+router.route('/staff/viewMissingDays')
+.get(tokenVerification, async (req,res) => {
+    const staff = await Academic_Member.find({id: req.data.id})
+
+    res.send({"missingDays": staff[0].Attendance.missingDays})
 })
-router.route('/staff/addCourse')
-.post(async (req,res)=>{    
-    const newM = new Course({
-        id: "CSEN701",
-        name: "Embedded",
-        department_name: "MET"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
 
-})
-router.route('/staff/addDepartment')
-.post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10872",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        room_location_id:"C5.201"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
+////////////////////////////////////////////VIEW MISSING/EXTRA HOURS////////////////////////////////////////////
+router.route('/staff/viewMissingExtraHours')
+.get(tokenVerification, async (req,res) => {
+    const staff = await Academic_Member.find({id: req.data.id})
 
-})
-router.route('/staff/addFaculty')
-.post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10872",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        room_location_id:"C5.201"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
-})
-router.route('/staff/addHR')
-.post(async (req,res)=>{    
-    const newM = new HR({
-        id: "43-10871",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf@gmail.com",
-        salary: 5000000,
-        password: "123",
-        room_location_id:"C5.201",
-        role : "HR"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
-})
-router.route('/staff/addLeaves')
-.post(async (req,res)=>{    
-    const newM = new Academic_Member({
-        id: "43-10872",
-        name: "Mohamed Ashraf",
-        email: "mohzashraf1@gmail.com",
-        salary: 5000000,
-        department_name: "MET",
-        room_location_id:"C5.201"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
-})
-router.route('/staff/addRoom')
-.post(async (req,res)=>{    
-    const newM = new room_location({
-        id: "C5.201",
-        type_of_Room: "Office"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
-})
-router.route('/staff/addSlot')
-.post(async (req,res)=>{    
-    const newM = new Slot({
-        course_id: "CSEN701",
-        day: "Tuesday",
-        room_location_id: "C7.301",
-        which_slot: 1,
-        academic_member_id: "43-10871"
-    })
-    await newM.save().then(doc => {
-        res.send(doc);
-    })
-    .then(response => {
-        //console.log(response)
-        res.send(response)
-        })
-        .catch(err => {
-        console.error(err)
-        })
-
+    res.send({"missingHours": staff[0].Attendance.missingHours + (staff[0].Attendance.missingMinutes/60), 
+              "extraHours": staff[0].Attendance.extraHours + (staff[0].Attendance.extraMinutes/60)})
 })
 
 
