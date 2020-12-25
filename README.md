@@ -39,22 +39,22 @@
       Request body: /////////////////////////////////////// 
       
     8.Functionality: View all Staff Members attendance records. 
-      Route: 
-      Request type:
+      Route: ////////////////////////
+      Request type://////////////////////////////
       Request body: /////////////////////////////////////// 
    
     9.Functionality: View Staff Member missing days.
-      Route: 
-      Request type:
+      Route://////////////////////////////// 
+      Request type:////////////////////////
       Request body: /////////////////////////////////////// 
       
     10.Functionality: View Staff Member are having missing hours or extra hours. 
-      Route: 
-      Request type:
+      Route: ////////////////////////////
+      Request type:///////////////////////////////
       Request body: /////////////////////////////////////// 
      
    ### HR Functionalities
-        1.Functionality:Add a location. 
+        1.Functionality: Add a location. 
           Route: /HR/addRoom
           Request type: POST
           Request body: /////////////////////////////////////// 
@@ -71,7 +71,7 @@
           Parameters: id is the ID of the Room we are getting its info
           Example of how to call the route: /////////////////////////////
 
-        4.Functionality:Add a Faculty. 
+        4.Functionality: Add a Faculty. 
           Route: /HR/addFaculty
           Request type: POST
           Request body: /////////////////////////////////////// 
@@ -87,44 +87,44 @@
           Request type: DELETE
           Request body: ///////////////////////////////////////
 
-        7.Functionality:Add a Department. 
+        7.Functionality: Add a Department. 
           Route: /HR/addDepartment
           Request type: POST
           Request body: /////////////////////////////////////// 
 
-         8.Functionality:Update a Department. 
+         8.Functionality: Update a Department. 
            Route: /HR/updateDepartment/:name
            Request type: PUT
            Parameters: name is the name of the Department we are getting its info
            Example of how to call the route: /////////////////////////////    
 
-         9.Functionality:Delete a Department. 
+         9.Functionality: Delete a Department. 
            Route: /HR/deleteDepartment/:name
            Request type: DELETE
            Parameters: name is the name of the Department we are getting its info
            Example of how to call the route: /////////////////////////////  
 
-        10.Functionality:Add a Course. 
-           Route:/HR/addCourse
+        10.Functionality: Add a Course. 
+           Route: /HR/addCourse
            Request type: POST
            Request body: /////////////////////////////////////// 
            
-        11.Functionality:Update a Course. 
-           Route:/HR/updateCourse
+        11.Functionality: Update a Course. 
+           Route: /HR/updateCourse
            Request type: PUT
            Request body: /////////////////////////////////////// 
            
-        12.Functionality:Delete a Course. 
-           Route:/HR/deleteCourse   
+        12.Functionality: Delete a Course. 
+           Route: /HR/deleteCourse   
            Request type:DELETE
            Request body: /////////////////////////////////////// 
            
-        13.Functionality:HR add Staff Member. 
-           Route:/HR/add_Academic_Member
+        13.Functionality: HR add Staff Member. 
+           Route: /HR/add_Academic_Member
            Request type: POST
            Request body: /////////////////////////////////////// 
            
-        14.Functionality:Update existing staff members. 
+        14.Functionality: Update existing staff members. 
            Route: /HR/update_academic_members/:id
            Request type: PUT
            Parameters: id is the id of the academic member we are getting its info
@@ -136,7 +136,7 @@
            Parameters: id is the id of the academic member we are getting its info
            Example of how to call the route: /////////////////////////////   
            
-        16.Functionality:Manually add a missing sign in/sign out record of a staff member. 
+        16.Functionality: Manually add a missing sign in/sign out record of a staff member. 
            Route:///////////
            Request type: ///////////
            Request body: ///////////////////////////////////////   
@@ -160,17 +160,17 @@
    ### Academic Members Functionalities
    #### A) HOD Functionalities
    
-        1.Functionality:Assign a course instructor. 
-          Route:/HOD/assign_course_instructor
+        1.Functionality: Assign a course instructor. 
+          Route: /HOD/assign_course_instructor
           Request type: POST
           Request body: /////////////////////////////////////// 
           
-        2.Functionality:Delete a course instructor. 
-          Route:/HOD/delete_course_instructor
+        2.Functionality: Delete a course instructor. 
+          Route: /HOD/delete_course_instructor
           Request type: DELETE
           Request body: /////////////////////////////////////// 
    
-        3.Functionality:Update a course instructor. 
+        3.Functionality: Update a course instructor. 
           Route: /HOD/update_course_instructor/:id
           Request type: PUT
           Parameters: id is the id of the Course Instructor we are getting his/her info
@@ -185,42 +185,42 @@
    #### B) Course Instructor Functionalities
    
         1.Functionality: View the coverage of course(s) Staff Member assigned to.
-          Route:/Instructor/viewCoverages
+          Route: /Instructor/viewCoverages
           Request type: GET
           Response: Array of Coverage Of Courses Staff Member assigned to. Example of a single Coverage Of Courses Staff Member assigned to: { ///////////////// }
 
         2.Functionality: View the slots’ assignment of course(s) Staff Member assigned to.
-          Route:/Instructor/viewCoursesSlots
+          Route: /Instructor/viewCoursesSlots
           Request type: GET
           Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
           
         3.Functionality: View all the staff in his/her department or per course along with their profiles.
-          Route:/Instructor/viewStaffProfiles
+          Route: /Instructor/viewStaffProfiles
           Request type: GET
           Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
           
         4.Functionality: Assign an academic member to an unassigned slots in course(s) he/she is assigned to.
-          Route:/Instructor/assignAcademicToSlot
+          Route: /Instructor/assignAcademicToSlot
           Request type: POST
           Request body: ///////////////////////////////////////   
          
         5.Functionality: Update assignment of academic member in course(s) he/she is assigned to.
-          Route:/Instructor/updateAcademicSlot
+          Route: /Instructor/updateAcademicSlot
           Request type: PUT
           Request body: ///////////////////////////////////////    
           
         6.Functionality: Delete assignment of academic member in course(s) he/she is assigned to.
-          Route:/Instructor/deleteAcademicSlot
+          Route: /Instructor/deleteAcademicSlot
           Request type: DELETE
           Request body: ///////////////////////////////////////
           
         7.Functionality: Remove an assigned academic member in course(s) he/she is assigned to.
-          Route:/Instructor/removeAcademicSlot
+          Route: /Instructor/removeAcademicSlot
           Request type: DELETE
           Request body: ///////////////////////////////////////
           
         8.Functionality: Assign an academic member in each of his/her course(s) to be a course coordinator. 
-          Route:/Instructor/assignAcademicCoordinator
+          Route: /Instructor/assignAcademicCoordinator
           Request type: POST
           Request body: /////////////////////////////////////// 
           
@@ -240,17 +240,17 @@
         2.
         
         
-        3.Functionality:Add course slot(s) in his/her course. 
+        3.Functionality: Add course slot(s) in his/her course. 
           Route: /Coordinator/addCourseSlot
           Request type: POST
           Request body: /////////////////////////////////////// 
           
         4.Functionality: Update course slot(s) in his/her course.
-          Route:/Coordinator/updateCourseSlot
+          Route: /Coordinator/updateCourseSlot
           Request type: PUT
           Request body: ///////////////////////////////////////    
           
-        5.Functionality:Delete course slot(s) in his/her course. 
+        5.Functionality: Delete course slot(s) in his/her course. 
           Route: /Coordinator/deleteCourseSlot
           Request type: DELETE
           Request body: /////////////////////////////////////// 
@@ -260,9 +260,94 @@
   
   
   #### D) Academic member Functionalities
+  
+        1.Functionality: View Academic member schedule. Schedule should show teaching activities and replacements if present.
+          Route: /Academic_Member/view_academic_member_schedule/:id
+          Request type: GET
+          Parameters: id is the ID of the Academic member we are getting his info
+          Example of how to call the route:////////////////////////////////////////////////
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
 
-           
-           
+        2.Functionality: Send “replacement” request(s). 
+          Route: /Academic_Member/send_replacement_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        3.Functionality: View “replacement” request(s).
+          Route: /Academic_Member/view_all_replacement_requests
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          
+        4.Functionality: Send a “slot linking” request. 
+          Route: /Academic_Member/send_slot-linking_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        5.Functionality: Send a “change day off” request. 
+          Route: /Academic_Member/send_change_day_off_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        6.Functionality: Submit annual leave request. 
+          Route: /Academic_Member/submit_annual_leave_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        7.Functionality: Submit sick leave request. 
+          Route: /Academic_Member/submit_sick_leave_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        8.Functionality: Submit accidental leave request. 
+          Route: /Academic_Member/submit_accidental_leave_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+        9.Functionality: Submit compensation request request. 
+          Route: /Academic_Member/submit_compensation_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+       10.Functionality: Submit maternity request request. 
+          Route: /Academic_Member/submit_maternity_request
+          Request type: POST
+          Request body: ///////////////////////////////////////
+          
+       11.Functionality: Notified requests status.
+          Route: /Academic_Member/view_status_of_all_requests
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          
+       12.Functionality: View Accepted Requests.
+          Route: /Academic_Member/view_accepted_requests
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          
+       13.Functionality: View Pending Requests.
+          Route: /Academic_Member/view_pending_requests
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// } 
+          
+       14.Functionality: View Rejected Requests.
+          Route: /Academic_Member/view_rejected_requests
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+       15.Functionality: Cancel a request whose day is yet to come.
+          Route: /Academic_Member/cancel_day_is_yet_to_come_requests
+          Request type: DELETE
+          Request body: ///////////////////////////////////////  
+          
+       16.Functionality: Cancel a still pending request.
+          Route: /Academic_Member/cancel_pending_requests
+          Request type: DELETE
+          Request body: ///////////////////////////////////////  
+          
+          
+          
+          
+          
+          
            
            
            
