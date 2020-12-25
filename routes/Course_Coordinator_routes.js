@@ -46,14 +46,14 @@ const tokenVerification = async (req,res,next) => {
 router.route('/Course_Coordinator/viewslotlinking')
 .get(tokenVerification, async( req,res)=>{
     if(!req.data.Coordinator){
-        res.send("Access denied! You must be a Head of Department!")
+        res.send("Access denied! You must be a course coordinator!")
 }
 else{
     var per=req.data.id
     var result77=[]
     var request77
     if(per){
-        const course =await courses.find({acedemic_coordinator_id:per})
+        const course =await courses.find({academic_coordinator_id:per})
     //    console.log(course)
         const course_taken=await Academic_Member.find({Coordinator:false})//Coordinator:false
       //  console.log(course_taken)
@@ -91,7 +91,7 @@ else{
 router.route('/Course_Coordinator/viewslotlinkingaccept_reject')
 .put(tokenVerification, async( req,res)=>{
     if(!req.data.Coordinator){
-        res.send("Access denied! You must be a Head of Department!")
+        res.send("Access denied! You must be a course coordinator!")
 }
 else{
     var per=req.data.id
@@ -118,7 +118,7 @@ else{
         .catch(err => {
         console.error(err)
         })
-        if(req.body.status_of_request==="Accept"){
+        if(req.body.status_of_request==="accepted"){
             
             if (req1[0].sender_id===req.body.slot.academic_member_id){
                  const academic=await Academic_Member.find({id:req1[0].sender_id})
@@ -177,7 +177,7 @@ else{
 router.route('/Coordinator/addCourseSlot')
 .post(tokenVerification, async (req,res)=>{
     if(!req.data.Coordinator){
-        res.send("Access denied! You must be a Head of Department!")
+        res.send("Access denied! You must be a course coordinator!")
 }
 else{
     const coordinator = await Academic_Member.find({id: req.data.id})
@@ -240,7 +240,7 @@ else{
 router.route('/Coordinator/deleteCourseSlot')
 .delete(tokenVerification, async (req,res)=>{
     if(!req.data.Coordinator){
-        res.send("Access denied! You must be a Head of Department!")
+        res.send("Access denied! You must be a course coordinator!")
 }
 else{
 
@@ -343,7 +343,7 @@ else{
 router.route('/Coordinator/updateCourseSlot')
 .put(tokenVerification, async (req,res)=>{
     if(!req.data.Coordinator){
-        res.send("Access denied! You must be a Head of Department!")
+        res.send("Access denied! You must be a course coordinator!")
 }
 else{
     const coordinator = await Academic_Member.find({id: req.data.id})

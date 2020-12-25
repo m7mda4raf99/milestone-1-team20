@@ -13,6 +13,7 @@ const Blocklist = require('../models/Blocklist')
 const room_location = require('../models/room_Location')
 const Attendance =require('../models/Attendance')
 const { response } = require('express')
+const room_Location = require('../models/room_Location')
 
 //var blockList = []
 var signIn
@@ -240,7 +241,6 @@ async function everyTenthDayOfEachMonth(){
     
 }
 
-
 ///////////////////////////////////////////////LOGIN////////////////////////////////////////////
 router.route('/staff/userLogin')
 .post(async(req,res)=>{
@@ -289,11 +289,10 @@ router.route('/staff/logout')
     else{
       
         //blockList.push(req.headers.token)
-        const 
-        Blockcontent = new Blocklist({
+        const Blockcontent = new Blocklist({
             name: req.headers.token
         })
-        await newBlockcontent.save()
+        await Blockcontent.save()
         .then(response => {res.send('You logged out successfully')}).catch(err => {console.log(err)})
 
     
@@ -514,7 +513,6 @@ router.route('/staff/signOut')
 
 })
 
-
 ///////////////////////////////////////////////VIEW ATTENDANCE////////////////////////////////////////////
 router.route('/staff/viewAttendance')
 .get(tokenVerification, async (req,res) => {
@@ -565,6 +563,56 @@ router.route('/staff/viewMissingExtraHours')
               "extraHours": staff[0].Attendance.extraHours + (staff[0].Attendance.extraMinutes/60)})
 })
 
+
+router.route('/staff/addHR')
+.post(async (req,res)=>{  
+    const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash("123456",salt)
+    
+    const newM = new HR({
+        id: "hr-1",
+        name: "Zeyad Salah",
+        email: "zeyadsalah@gmail.com",
+        salary: 5,
+        room_location_id:"C5.201",
+        role: "HR",
+        gender: "female",
+        Phone_Number: 010,
+        isNewMember: true,
+        password: hashedPassword
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
+
+router.route('/staff/addRoom')
+.post(async (req,res)=>{
+    const newM = new room_Location({
+        id: "C5.201",
+        type_of_Room: "office",
+        capacity_left: 3
+    })
+    await newM.save().then(doc => {
+        res.send(doc);
+    })
+    .then(response => {
+        //console.log(response)
+        res.send(response)
+        })
+        .catch(err => {
+        console.error(err)
+        })
+
+})
 
 module.exports = router
 

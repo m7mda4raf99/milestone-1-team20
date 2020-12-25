@@ -10,11 +10,17 @@ const Department = require('../models/Department')
 const course = require('../models/course')
 const Blocklist = require('../models/Blocklist')
 const Info = require('../models/Info')
+const HR = require('../models/hr')
+
 
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const { response } = require('express')
+
+const Joi = require('@hapi/joi')
+const Attendance = require('../models/Attendance')
+
 var id = 0
 
 const tokenVerification = async (req,res,next) => {
@@ -119,7 +125,7 @@ router.route('/HR/deleteRoom/:id')
         .findOneAndRemove({id: req.params.id})
         .then(response => {
             console.log(response)
-            res.send(response) })
+            res.send("Deleted successfully!") })
         .catch(err => { console.error(err)})
     }
 })
@@ -147,9 +153,24 @@ router.route('/HR/deleteFaculty')
         res.send("Access denied! You must be a HR member!")
     }else{
         await  Faculty.findOneAndRemove({name: req.body.name})
-        .then(response => {console.log(response)
-        res.send(response)})
+        .then(response => {})
         .catch(err => {console.error(err)})
+
+        const dep = await Department.find({faculty_name: req.body.name})
+
+        await Department.findOneAndRemove({faculty_name: req.body.name})
+
+        for(var i=0; i< dep.length;i++){
+            const newDep = new Department({
+                name: dep[i].name,
+                faculty_name: null
+            })
+
+            await newDep.save()
+            .then(response=>{})
+            .catch(err=>{console.log(err)})
+        }
+
        
         var oldUsers = await Academic_Member.find({faculty_name : req.body.name})
 
@@ -184,10 +205,11 @@ router.route('/HR/deleteFaculty')
             })
             console.log(newUser)
             await newUser.save().then(doc => {})
-            .then(response => {res.send("faculty deleted successfully!")})
+            .then(response => {})
             .catch(err => {console.error("Can't save updated user to database")})
             
         }
+        res.send("faculty deleted successfully!")
     }
 })
 
@@ -223,7 +245,7 @@ router.route('/HR/updateFaculty/:name')
             })
             console.log(newDepart)
             await newDepart.save().then(doc => {
-                res.send("jnkm");
+            
             }).then(response => {}).catch(err => {console.error("Can't save updated department to database")})
         }
 
@@ -262,7 +284,7 @@ router.route('/HR/updateFaculty/:name')
             })
             console.log(newUser)
             await newUser.save().then(doc => {
-                res.send("jnkm");
+                res.send("Updated successfully!");
             }).then(response => {}).catch(err => {console.error("Can't save updated user to database")})
             
         }
@@ -485,7 +507,6 @@ router.route('/HR/addCourse')
       academic_coordinator_id:req.body.academic_coordinator_id,
       slots: req.body.academic_coordinator_id,
 
-      
   })    
 
  const exists= await  Department.exists({name: req.body.department_name})
@@ -510,24 +531,24 @@ router.route('/HR/updateCourse')
     }else{
         const oldcourse = await course.find({id: req.body.id})
 
-        var course_covarage = 0
+        var course_coverage = 0
         var name = ""
-        var acedemic_coordinator_id=""
+        var academic_coordinator_id=""
 
-        if(req.body.course_covarage){
-            course_covarage = req.body.course_covarage
+        if(req.body.course_coverage){
+            course_coverage = req.body.course_coverage
         }else{
-            course_covarage = oldcourse[0].course_covarage
+            course_coverage = oldcourse[0].course_coverage
         }
         if(req.body.name){
             name = req.body.name
         }else{
             name = oldcourse[0].name
         }
-        if(req.body. acedemic_coordinator_id){
-            acedemic_coordinator_id = req.body. acedemic_coordinator_id
+        if(req.body. academic_coordinator_id){
+            academic_coordinator_id = req.body. academic_coordinator_id
         }else{
-            acedemic_coordinator_id = oldcourse[0]. acedemic_coordinator_id
+            academic_coordinator_id = oldcourse[0]. academic_coordinator_id
         }
 
         await course.findOneAndRemove({id: req.body.id})
@@ -601,16 +622,16 @@ router.route('/HR/addAcademicMember')
     
     email:Joi.string().email().required() ,
     id:Joi.string().required(),
-    name :Joi.string().alphanum().min(3).max(30).required(),
-    password: Joi.string().required(),
-    salary:Joi.number(),
+    name :Joi.string().min(3).max(30).required(),
+    password: Joi.string(),
+    salary:Joi.number().required(),
     department_name:Joi.string(),
     faculty_name:Joi.string(),
-    room_location_id:Joi.string(),
-    HOD: Joi.boolean().required(),
-    Coordinator:Joi.boolean().required(),
+    room_location_id:Joi.string().required(),
+    HOD: Joi.boolean(),
+    Coordinator:Joi.boolean(),
     role:Joi.string().required(),
-    gender:Joi.string().required(),
+    gender:Joi.string(),
     courses_taught:Joi.string(),
     assign_slots:Joi.string(),
     schedule:Joi.string(),
@@ -633,6 +654,8 @@ router.route('/HR/addAcademicMember')
     // }
 
 
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash("123456",salt)
 
    
 
@@ -640,7 +663,7 @@ router.route('/HR/addAcademicMember')
     id:req.body.id,
     name : req.body.name, 
     email: req.body.email,
-    password: req.body.password,
+    password: hashedPassword,
     salary:req.body.salary,
     department_name:req.body.department_name,
     faculty_name:req.body.faculty_name,
@@ -758,7 +781,7 @@ else{
         id_academic:inforecord77[0].id_academic,
         id_request:inforecord77[0].id_request
     })
-    Info.findOneAndRemove({id_hr:inforecord77[0].id_hr})
+    await Info.findOneAndRemove({id_hr:inforecord77[0].id_hr})
 
     await newinfo.save().then(doc => {
         result7+=doc;
@@ -785,8 +808,25 @@ res.send(result7)
     if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
+        var result7 
         const info=await Info.find()
-        res.send("ac-"+ info[0].id_academic);
+        if(info.length===0){
+            const newinfo=new Info({})
+            await newinfo.save().then(doc => {
+                result7+=doc;
+               
+            })
+            .catch(err => {
+            console.error(err)
+        })
+
+        res.send("ac-"+ newinfo.id_academic);
+
+        }else{
+            res.send("ac-"+ info[info.length-1].id_academic);
+        }
+
+
     }
 })
 
@@ -863,20 +903,7 @@ router.route('/HR/updateAcademicMember/:id')
         res.send("Access denied! You must be a HR member!")
     }else{
         var result7=""
-    const schema=Joi.object({
     
-        id:Joi.string().required(),
-   
-        })
-        try{
-        const validation = await schema.validateAsync(req.params)
-        }
-        catch(err){
-            return res.send(
-               // message:validation.error.details[0].message
-               err.details[0].message
-            )
-        }
     const record= await Academic_Member.find({id: req.params.id});
     if(record===0){
         return res.send("this id doesn't exist")
@@ -887,20 +914,7 @@ router.route('/HR/updateAcademicMember/:id')
     var id, name, email, password, salary, department_name, faculty_name, room_location_id, HOD, Coordinator,
     role, gender, courses_taught, assign_slots, schedule, Phone_Number, Attendance, Notification, putInVisa
 
-    const schema1=Joi.object({
     
-        id:Joi.string().required(),
-   
-        })
-        try{
-        const validation1 = await schema1.validateAsync(req.body)
-        }
-        catch(err){
-            return res.send(
-               // message:validation.error.details[0].message
-               err.details[0].message
-            )
-        }
 
     if(req.body.id){
         id = req.body.id
@@ -956,7 +970,7 @@ router.route('/HR/updateAcademicMember/:id')
         
         
         await newRoom.save().then(doc => {
-            res.send(doc);
+           // res.send(doc);
            
         })
         .catch(err => {
@@ -1070,6 +1084,14 @@ router.route('/HR/updateAcademicMember/:id')
         putInVisa = record[0].putInVisa
     }
 
+    if(req.body.password){
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(req.body.password,salt)
+        password = hashedPassword
+    }else{
+        password = record[0].password
+    }
+
     const Academicmodel=  new Academic_Member({
                 id:id,
                 name : name, 
@@ -1115,19 +1137,25 @@ router.route('/HR/addHRMember')
     if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
+        const att = new Attendance({
+            dayOff: "Saturday"
+        })
+
+        const salt = await bcrypt.genSalt(10)
+         const hashedPassword = await bcrypt.hash("123456",salt)
+
         const HR_model=  new hr({
             id:req.body.id,
             name : req.body.name, 
             email: req.body.email,
-            password: req.body.password,
+            password: hashedPassword,
             salary:req.body.salary,
             room_location_id:req.body.room_location_id,
             role:req.body.role,
             gender:req.body.gender,
             Phone_Number:req.body.Phone_Number,
             isNewMember:req.body.isNewMember,
-    
-           
+            Attendance: att
            
         
           })
@@ -1230,7 +1258,24 @@ router.route('/HR/addHRMember')
     if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-         res.send("hr-"+id);
+        var result7 
+        const info=await Info.find()
+        if(info.length===0){
+            const newinfo=new Info({})
+            await newinfo.save().then(doc => {
+                result7+=doc;
+               
+            })
+            .catch(err => {
+            console.error(err)
+        })
+
+        res.send("hr-"+ newinfo.id_academic);
+
+        }else{
+            res.send("hr-"+ info[info.length-1].id_hr);
+        }
+
     }
 })
 
@@ -1433,39 +1478,51 @@ router.route('/HR/viewAttendance/:id')
     if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-    const academicmember= await HR.find({id:req.params.id})
-    var i=0;
+    const academicmember= await Academic_Member.find({id:req.params.id})
+    //if(academicmember.length !== 0){
     res.send(academicmember[0].Attendance)
-
-   //  await res.send(HR.Attendance)
 }
     })
 
 //////////////////////////////////VIEW MISSING HOURS/DAYS/////////////////////////////////////////
 
 router.route('/HR/viewAttendanceMissingHoursDays')
-.get(tokenVerification, async( req,res)=>{
+.get(tokenVerification, async(req,res)=>{
     if(req.data.role.toLowerCase() !== "hr"){
         res.send("Access denied! You must be a HR member!")
     }else{
-    const users = await HR.find()
-var i=0;
-var result = ""
-while(i<users.length){
-    if(users[i].Attendance){
-    result += ("Staff ID: "+users[i].id+", Missed Hours: "+users[i].Attendance.missingHours+", Missed Days: "+users[i].Attendance.missingDays) + "\n"
+    var i=0;
+    var result = []
+    var object 
 
+    const users = await HR.find()
+    for(var i=0; i<users.length;i++){
+        if(users[i].Attendance.missingDays >= 0 || 
+            (users[i].Attendance.missingHours+(users[i].Attendance.missingMinutes/60)) >= 0){
+                object = {"id": users[i].id, "missingDays" : users[i].Attendance.missingDays,
+            "missingHours": (users[i].Attendance.missingHours+(users[i].Attendance.missingMinutes/60))}
+            }
+            result.push(object)
     }
-i++
-}
-res.send(result)
-    }
-    })   
+    const users1 = await Academic_Member.find()
+
+    for(var i=0; i<users1.length;i++){
+        if(users1[i].Attendance.missingDays !== 0 || 
+            (users1[i].Attendance.missingHours+(users1[i].Attendance.missingMinutes/60)) !== 0){
+                object = {"id": users1[i].id, "missingDays" : users1[i].Attendance.missingDays,
+            "missingHours": (users1[i].Attendance.missingHours+(users1[i].Attendance.missingMinutes/60))}
+            
+            result.push(object)
+            }
+        }
+         res.send(result)
+        }
+        })   
 
 //////////////////////////////////////UPDATE SALARY/////////////////////////////////////////
 
 router.route('/HR/updateAcademicmemberSalary')
-    .put(async( req,res)=>{
+    .put(tokenVerification, async( req,res)=>{
         if(req.data.role.toLowerCase() !== "hr"){
             res.send("Access denied! You must be a HR member!")
         }
