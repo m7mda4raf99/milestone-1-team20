@@ -176,6 +176,7 @@
           Parameters: id is the id of the Course Instructor we are getting his/her info
           Example of how to call the route: /////////////////////////////    
 
+          .............TO BE CONTINUE............
    
    
    
@@ -230,7 +231,30 @@
 
   #### C) Course Coordinator Functionalities
   
-  
+
+        1.Functionality: View “slot linking” request(s) from academic members linked to his/her course.
+          Route://////////////////
+          Request type: GET
+          Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
+          
+        2.
+        
+        
+        3.Functionality:Add course slot(s) in his/her course. 
+          Route: /Coordinator/addCourseSlot
+          Request type: POST
+          Request body: /////////////////////////////////////// 
+          
+        4.Functionality: Update course slot(s) in his/her course.
+          Route:/Coordinator/updateCourseSlot
+          Request type: PUT
+          Request body: ///////////////////////////////////////    
+          
+        5.Functionality:Delete course slot(s) in his/her course. 
+          Route: /Coordinator/deleteCourseSlot
+          Request type: DELETE
+          Request body: /////////////////////////////////////// 
+          
   
   
   
