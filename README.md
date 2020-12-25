@@ -163,18 +163,18 @@
         1.Functionality: Assign a course instructor. 
           Route: /HOD/assign_course_instructor
           Request type: POST
-          Request body: /////////////////////////////////////// 
+          Request body: {"hod_id":"ac-7161","course_instructor_id":"ac-1716","course_id":"CSEN702"}
           
         2.Functionality: Delete a course instructor. 
           Route: /HOD/delete_course_instructor
           Request type: DELETE
-          Request body: /////////////////////////////////////// 
+          Request body: {"hod_id":"ac-71","course_instructor_id":"ac-16","course_id":"CSEN704"} 
    
         3.Functionality: Update a course instructor. 
           Route: /HOD/update_course_instructor/:id
           Request type: PUT
           Parameters: id is the id of the Course Instructor we are getting his/her info
-          Example of how to call the route: /////////////////////////////    
+          Example of how to call the route:update_course_instructor/:ac-72    
           
         4.Functionality: View all the staff in his/her department or per course along with their profiles.
           Route: /////////////////////////////////////////
