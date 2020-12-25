@@ -233,12 +233,14 @@
   
 
         1.Functionality: View “slot linking” request(s) from academic members linked to his/her course.
-          Route://////////////////
+          Route: /Course_Coordinator/viewslotlinking
           Request type: GET
           Response: Array of ///////////////. Example of a single //////////// assigned to: { ///////////////// }
           
-        2.
-        
+        2.Functionality: Accept/reject “slot linking” requests .
+          Route: /Course_Coordinator/viewslotlinkingaccept_reject
+          Request type: PUT
+          Request body: ///////////////////////////////////////  
         
         3.Functionality: Add course slot(s) in his/her course. 
           Route: /Coordinator/addCourseSlot
