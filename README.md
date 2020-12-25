@@ -159,6 +159,30 @@
            
    ### Academic Members Functionalities
    #### A) HOD Functionalities
+   
+   
+   
+   
+   
+   
+   
+   
+   #### B) Course Instructor Functionalities
+   
+   
+
+
+
+
+
+  #### C) Course Coordinator Functionalities
+  
+  
+  
+  
+  
+  
+  #### D) Academic member Functionalities
 
            
            
