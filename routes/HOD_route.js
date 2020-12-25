@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const Academic_Member = require('../models/Academic_Member')
 const Department = require('../models/Department')
 const course = require('../models/course')
+const Blocklist = require('../models/Blocklist')
 
 require('dotenv').config()
 
@@ -678,15 +679,16 @@ else{
         const slotcourse=await slot.find({course_id:req.params.course})
         var academicmemberdep=""
         var coursedep=""
-    var result2="";
+    var result2=[];
         for(var i=0;i<slotcourse.length;i++){
          academicmemberdep=await Academic_Member.find({id:slotcourse[i].academic_member_id})
          coursedep=await course.find({id:slotcourse[i].course_id})
          if(academicmemberdep[0].department_name===depname && coursedep[0].department_name===depname){
-        result2+="   course name: "+slotcourse[i].course_id+"  day: "+slotcourse[i].day+"   room location: "+slotcourse[i].room_location_id+"  which slot: "+slotcourse[i].which_slot+"  academic member id: "+slotcourse[i].academic_member_id+"\n"
+           result2.push(slotcourse[i])
+            // result2+="   course name: "+slotcourse[i].course_id+"  day: "+slotcourse[i].day+"   room location: "+slotcourse[i].room_location_id+"  which slot: "+slotcourse[i].which_slot+"  academic member id: "+slotcourse[i].academic_member_id+"\n"
     }
     }
-    if(result2==="")
+    if(result2.length === 0)
       res.send("No result found")
       else
       res.send(result2)

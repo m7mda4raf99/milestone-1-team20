@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Attendance = require('./Attendance').schema;
 
 const hrSchema = new mongoose.Schema({
     id: {
@@ -38,8 +39,12 @@ const hrSchema = new mongoose.Schema({
     isNewMember: {
         type: Boolean,
         default: true
+    },
+    Attendance:{
+        type: Attendance
     }
 })
+
 
 
 module.exports = mongoose.model('HR',hrSchema)

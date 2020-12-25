@@ -4,6 +4,8 @@ const router = express.Router()
 const Academic_Member = require('../models/Academic_Member')
 const Request = require('../models/requests')
 const Course = require('../models/course')
+const Blocklist = require('../models/Blocklist')
+const jwt = require('jsonwebtoken')
 
 require('dotenv').config()
 
@@ -17,6 +19,7 @@ const tokenVerification = async (req,res,next) => {
            if(blockList.length === 0){
             try{
                 const correctToken = jwt.verify(token, process.env.TOKEN_SECRET)
+                console.log(correctToken)
                     if(correctToken){
                         req.data = correctToken
                         next()
@@ -37,6 +40,7 @@ const tokenVerification = async (req,res,next) => {
         res.status(403).send('Access denied. You need a token')
     }
 }
+
 
 function day_getter(num){
     if(num === 0 ){
@@ -892,12 +896,12 @@ router.route('/AcademicMember/cancel_day_is_yet_to_come_requests')
 }
 else{
 
-    const all_requests =await Request.find({})
+    const all_requests =await Request.find({})  
 
-   const all_requests_who_is_day_to_come = all_requests.filter(item => new Date(item.target_day) < new Date(Date.now()))
+   const all_requests_who_is_day_to_come = all_requests.filter(item => new Date(item.target_day) > new Date(Date.now()))
 
 
-            if(all_requests.filter(item => new Date(item.target_day) < new Date(Date.now())).length !==0){
+            if(all_requests_who_is_day_to_come.length !==0){
                 if(all_requests_who_is_day_to_come.filter(item => item.id===req.body.request_id) !==0){
                     await Request.findByIdAndRemove({
                         id:req.body.request_id
@@ -905,13 +909,13 @@ else{
                 }
                 else{
                     {
-                        res.send("the entered pending request ")
+                        res.send("the entered request id target day has passed")
                     }
                 }
                
             }
             else{
-                res.send("the entered request id target day has passed")
+                res.send("all requests have a target day less than the current date")
             } 
 }     
         

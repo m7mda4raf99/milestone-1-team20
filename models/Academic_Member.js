@@ -68,11 +68,11 @@ const academicMemberSchema = new mongoose.Schema({
     },
     annual_balance:{
         type:Number,
-        default: 0
+        default: 2.5
     },
     accidental_balance:{
         type:Number,
-        default: 0
+        default: 6
     },
     Attendance : {
         type: Attendance
