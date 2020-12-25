@@ -157,7 +157,9 @@
            Parameters:////////////////////////////////////////////////////////////////////
            Example of how to call the route: /////////////////////////////      
            
-           
+   ### Academic Members Functionalities
+   #### A) HOD Functionalities
+
            
            
            
